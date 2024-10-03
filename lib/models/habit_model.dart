@@ -23,10 +23,11 @@ class Habit {
       required this.creationDate});
 
   factory Habit.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>;
-    if (data.isEmpty) {
-      throw Exception('Document data is null');
+    if (!doc.exists || doc.data() == null) {
+      throw Exception("Habit document doesnt exist or is null");
     }
+
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>;
 
     return Habit(
         id: doc.id,

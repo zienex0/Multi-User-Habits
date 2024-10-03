@@ -8,10 +8,11 @@ class User {
   User({required this.id, required this.email, required this.displayName});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    if (data.isEmpty) {
-      throw Exception('Document data is null');
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('User document doesnt exist or is null');
     }
+
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     return User(
         id: doc.id,

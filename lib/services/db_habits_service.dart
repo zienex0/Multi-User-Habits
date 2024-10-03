@@ -13,10 +13,15 @@ class DbHabits {
   }
 
   Future<Habit?> getHabitData(String habitId) async {
-    DocumentSnapshot habitDoc = await habitCollection.doc(habitId).get();
-    if (habitDoc.exists) {
-      return Habit.fromFirestore(habitDoc);
-    } else {
+    try {
+      DocumentSnapshot habitDoc = await habitCollection.doc(habitId).get();
+      if (habitDoc.exists) {
+        return Habit.fromFirestore(habitDoc);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching habit: $e');
       return null;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
+import 'package:multiuser_habits/models/user_habit_model.dart';
 import 'package:multiuser_habits/models/user_model.dart';
 import 'package:multiuser_habits/services/db_user_habits_service.dart';
 
@@ -23,8 +24,8 @@ class HabitTile extends StatelessWidget {
           style: const TextStyle(fontSize: 20),
         ),
         children: [
-          FutureBuilder<List<User>>(
-            future: dbUserHabits.getAllHabitUsers(habit.id),
+          FutureBuilder<List<UserHabit>>(
+            future: dbUserHabits.getAllRawHabitCompletions(habit.id),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Error loading users');
@@ -34,13 +35,26 @@ class HabitTile extends StatelessWidget {
                 return const Text('No users connected to this habit');
               }
 
-              List<User> users = snapshot.data!;
+              List<UserHabit> habitCompletionHistory = snapshot.data!;
               return Column(
-                children: users.map((user) {
+                children: habitCompletionHistory.map((completion) {
+                  // RIGHT NOW FUNCTIONS WILL NOT WORK BECAUSE THEY ARE ASYNCHRONOUS
+                  completion.fetchAndAssignUser(completion.userId);
+                  completion.fetchAndAssignHabit(completion.habitId);
+                  print(completion.user);
+                  if (completion.user == null) {
+                    return const ListTile(
+                      title: Text("Unknown"),
+                      leading: CircleAvatar(
+                        child: Icon(Icons.person),
+                      ),
+                    );
+                  }
+
                   return ListTile(
-                    title: Text(user.displayName),
+                    title: Text(completion.user!.displayName),
                     leading: CircleAvatar(
-                      child: Text(user.displayName[0]),
+                      child: Text(completion.user!.displayName[0]),
                     ),
                   );
                 }).toList(),
