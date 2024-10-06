@@ -36,4 +36,23 @@ class DbUserHabits {
 
     // return uniqueUsers;
   }
+
+  Future<List<User>> getAllUniqueUsersFromHabit(
+      QuerySnapshot habitHistory) async {
+    Set<String> uniqueUserIdsFromHabit = {};
+
+    for (var doc in habitHistory.docs) {
+      uniqueUserIdsFromHabit.add(doc['userId'] as String);
+    }
+
+    List<User> uniqueUsers = [];
+    for (var userId in uniqueUserIdsFromHabit) {
+      User? user = await dbUsers.getUserData(userId);
+      if (user != null) {
+        uniqueUsers.add(user);
+      }
+    }
+
+    return uniqueUsers;
+  }
 }

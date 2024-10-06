@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:multiuser_habits/components/complete_habit_button.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
-import 'package:multiuser_habits/models/user_habit_model.dart';
-import 'package:multiuser_habits/models/user_model.dart';
-import 'package:multiuser_habits/services/db_user_habits_service.dart';
 
 class HabitTile extends StatelessWidget {
   const HabitTile({required this.habit, super.key});
@@ -11,55 +9,44 @@ class HabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DbUserHabits dbUserHabits = DbUserHabits();
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        title: Text(
-          habit.name,
-          style: const TextStyle(fontSize: 32),
-        ),
-        subtitle: Text(
-          'Goal: ${habit.goal} ${habit.measurement} ${habit.frequency}',
-          style: const TextStyle(fontSize: 20),
-        ),
-        children: [
-          FutureBuilder<List<UserHabit>>(
-            future: dbUserHabits.getAllRawHabitCompletions(habit.id),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text('Error loading users');
-              }
-
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Text('No users connected to this habit');
-              }
-
-              List<UserHabit> habitCompletionHistory = snapshot.data!;
-              return Column(
-                children: habitCompletionHistory.map((completion) {
-                  // RIGHT NOW FUNCTIONS WILL NOT WORK BECAUSE THEY ARE ASYNCHRONOUS
-                  print(completion.user);
-                  if (completion.user == null) {
-                    return const ListTile(
-                      title: Text("Unknown"),
-                      leading: CircleAvatar(
-                        child: Icon(Icons.person),
-                      ),
-                    );
-                  }
-
-                  return ListTile(
-                    title: Text(completion.user!.displayName),
-                    leading: CircleAvatar(
-                      child: Text(completion.user!.displayName[0]),
+      child: Card(
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+              color: Colors.grey.shade900,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey)),
+          height: 100,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // habit information on the left
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      habit.name.isNotEmpty ? habit.name : 'No habit name',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w600),
                     ),
-                  );
-                }).toList(),
-              );
-            },
+                    Text(
+                      'Goal: ${habit.goal} ${habit.measurement}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w200),
+                    ),
+                  ],
+                ),
+                // complete habit button on the right
+                const CompleteHabitButton(),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

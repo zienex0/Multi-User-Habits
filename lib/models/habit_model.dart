@@ -1,27 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Habit {
-  final String id;
+  String? id;
   final String name;
   final String description;
   final String creatorId;
-  final String frequency;
-  final String goal;
+  final double goal;
   final String measurement;
   final bool isActive;
-  final Timestamp creationDate;
+  final bool isPrivate;
+  final DateTime creationDate;
 
   // FREQUENCY IS NOT IMPORTANT, ALL HABITS WILL BE DAILY
 
   Habit(
-      {required this.id,
+      {this.id,
       required this.name,
       required this.description,
       required this.creatorId,
-      required this.frequency,
       required this.goal,
       required this.measurement,
       required this.isActive,
+      required this.isPrivate,
       required this.creationDate});
 
   factory Habit.fromFirestore(DocumentSnapshot doc) {
@@ -33,14 +33,16 @@ class Habit {
 
     return Habit(
         id: doc.id,
-        name: data['name'] ?? '',
+        name: data['name'],
         description: data['description'] ?? '',
-        creatorId: data['creatorId'] ?? '',
-        frequency: data['frequency'] ?? '',
-        goal: data['goal'] ?? '',
+        creatorId: data['creatorId'],
+        goal: (data['goal'] is int)
+            ? (data['goal'] as int).toDouble()
+            : data['goal'] as double,
         isActive: data['isActive'] ?? false,
+        isPrivate: data['isPrivate'],
         measurement: data['measurement'] ?? '',
-        creationDate: data['creationDate']);
+        creationDate: (data['creationDate'] as Timestamp).toDate());
   }
 
   Map<String, dynamic> toMap() {
@@ -49,10 +51,11 @@ class Habit {
       'name': name,
       'description': description,
       'creatorId': creatorId,
-      'frequency': frequency,
       'goal': goal,
       'isActive': isActive,
+      'isPrivate': isPrivate,
       'measurement': measurement,
+      'creationDate': Timestamp.fromDate(creationDate),
     };
   }
 }
