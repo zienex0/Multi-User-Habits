@@ -11,6 +11,8 @@ class Habit {
   final bool isActive;
   final Timestamp creationDate;
 
+  // FREQUENCY IS NOT IMPORTANT, ALL HABITS WILL BE DAILY
+
   Habit(
       {required this.id,
       required this.name,

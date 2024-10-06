@@ -7,7 +7,7 @@ import 'package:multiuser_habits/services/db_users_service.dart';
 class UserHabit {
   final String id;
   final Timestamp completionDate;
-  final int quantity;
+  final double quantity;
   final String userNote;
   final String habitId;
   final String userId;
@@ -31,16 +31,31 @@ class UserHabit {
 
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
+    double quantity = (data['quantity'] is int)
+        ? (data['quantity'] as int).toDouble()
+        : data['quantity'] as double;
+
+    print(data);
+
     return UserHabit(
         id: doc.id,
         completionDate: data['completionDate'],
-        quantity: data['quantity'],
+        quantity: quantity,
         userNote: data['userNote'] ?? '',
         habitId: data['habitId'],
         userId: data['userId']);
   }
 
-  Future<void> fetchAndAssignUser(String userHabitUserId) async {
+  Future<void> fetchAndAssignUserAndHabit() async {
+    try {
+      await _fetchAndAssignUser(userId);
+      await _fetchAndAssignHabit(habitId);
+    } catch (e) {
+      throw Exception("Error fetching user or habit from UserHabit model: $e");
+    }
+  }
+
+  Future<void> _fetchAndAssignUser(String userHabitUserId) async {
     DbUsers dbUsers = DbUsers();
     user = await dbUsers.getUserData(userHabitUserId);
     if (user == null) {
@@ -49,7 +64,7 @@ class UserHabit {
     }
   }
 
-  Future<void> fetchAndAssignHabit(String userHabitHabitId) async {
+  Future<void> _fetchAndAssignHabit(String userHabitHabitId) async {
     DbHabits dbHabits = DbHabits();
     habit = await dbHabits.getHabitData(userHabitHabitId);
     if (habit == null) {

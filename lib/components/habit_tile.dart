@@ -39,8 +39,6 @@ class HabitTile extends StatelessWidget {
               return Column(
                 children: habitCompletionHistory.map((completion) {
                   // RIGHT NOW FUNCTIONS WILL NOT WORK BECAUSE THEY ARE ASYNCHRONOUS
-                  completion.fetchAndAssignUser(completion.userId);
-                  completion.fetchAndAssignHabit(completion.habitId);
                   print(completion.user);
                   if (completion.user == null) {
                     return const ListTile(

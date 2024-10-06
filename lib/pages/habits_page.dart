@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
+import 'package:multiuser_habits/pages/add_habit_page.dart';
 import 'package:multiuser_habits/services/db_habits_service.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
 
@@ -10,7 +11,14 @@ class HabitsPage extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddHabitPage(),
+            ),
+          );
+        },
       ),
       body: FutureBuilder<List<Habit>>(
         future: habitsCollection.getAllHabits(),
