@@ -10,7 +10,7 @@ class UserHabit {
   final double quantity;
   final String userNote;
   final String habitId;
-  final String userId;
+  final String userUid;
   late CustomUser? user;
   late Habit? habit;
 
@@ -20,7 +20,7 @@ class UserHabit {
       required this.quantity,
       required this.userNote,
       required this.habitId,
-      required this.userId,
+      required this.userUid,
       this.user,
       this.habit});
 
@@ -43,24 +43,24 @@ class UserHabit {
         quantity: quantity,
         userNote: data['userNote'] ?? '',
         habitId: data['habitId'],
-        userId: data['userId']);
+        userUid: data['userUid']);
   }
 
   Future<void> fetchAndAssignUserAndHabit() async {
     try {
-      await _fetchAndAssignUser(userId);
+      await _fetchAndAssignUser(userUid);
       await _fetchAndAssignHabit(habitId);
     } catch (e) {
       throw Exception("Error fetching user or habit from UserHabit model: $e");
     }
   }
 
-  Future<void> _fetchAndAssignUser(String userHabitUserId) async {
+  Future<void> _fetchAndAssignUser(String userHabitUserUid) async {
     DbUsers dbUsers = DbUsers();
-    user = await dbUsers.getUserData(userHabitUserId);
+    user = await dbUsers.getUserDataByUserUid(userHabitUserUid);
     if (user == null) {
       throw Exception(
-          "Error while fetching and assigning user. User with id $userId not found.");
+          "Error while fetching and assigning user. User with id $userUid not found.");
     }
   }
 

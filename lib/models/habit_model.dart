@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Habit {
   String? id;
-  final String name;
-  final String description;
+  String name;
+  String description;
   final String creatorId;
-  final double goal;
-  final String measurement;
-  final bool isActive;
-  final bool isPrivate;
-  final DateTime creationDate;
+  double goal;
+  String measurement;
+  bool isActive;
+  bool isPrivate;
+  DateTime creationDate;
 
   // FREQUENCY IS NOT IMPORTANT, ALL HABITS WILL BE DAILY
 

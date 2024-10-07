@@ -25,15 +25,15 @@ class DbUserHabits {
     QuerySnapshot habitHistory =
         await userHabits.where('habitId', isEqualTo: habitId).get();
 
-    Set<String> uniqueUserIdsFromHabit = {};
+    Set<String> uniqueUserUidsFromHabit = {};
 
     for (var doc in habitHistory.docs) {
-      uniqueUserIdsFromHabit.add(doc['userId'] as String);
+      uniqueUserUidsFromHabit.add(doc['userUid'] as String);
     }
 
     List<CustomUser> uniqueUsers = [];
-    for (var userId in uniqueUserIdsFromHabit) {
-      CustomUser? user = await dbUsers.getUserData(userId);
+    for (var userUid in uniqueUserUidsFromHabit) {
+      CustomUser? user = await dbUsers.getUserDataByUserUid(userUid);
       if (user != null) {
         uniqueUsers.add(user);
       }

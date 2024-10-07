@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/pages/habits_page.dart';
+import 'package:multiuser_habits/pages/sign_up_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -11,11 +12,8 @@ class AuthGate extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(
-            child: Text('User is not logged in. YAY!'),
-          );
+          return SignUpPage();
         }
-
         return const HabitsPage();
       },
     );

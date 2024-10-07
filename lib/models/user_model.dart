@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomUser {
-  final String id;
+  String? id;
   final String uid;
   final String email;
   final String displayName;
   final String? photoUrl;
 
   CustomUser(
-      {required this.id,
+      {this.id,
       required this.uid,
       required this.email,
       required this.displayName,
@@ -31,7 +31,7 @@ class CustomUser {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': uid,
+      'uid': uid,
       'email': email,
       'displayName': displayName,
       'photoUrl': photoUrl,

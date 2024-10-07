@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-// import 'package:multiuser_habits/components/habit_tile.dart';
+import 'package:multiuser_habits/components/habit_tile.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
+import 'package:multiuser_habits/services/form_validator.dart';
 import 'package:multiuser_habits/services/habits_provider.dart';
 import 'package:multiuser_habits/services/db_habits_service.dart';
 import 'package:provider/provider.dart';
 
 class AddHabitPage extends StatefulWidget {
-  // AddHabitPage({super.key});
+  const AddHabitPage({super.key});
 
   @override
   State<AddHabitPage> createState() => _AddHabitPageState();
@@ -15,15 +16,37 @@ class AddHabitPage extends StatefulWidget {
 class _AddHabitPageState extends State<AddHabitPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _habitNameController = TextEditingController();
-  final TextEditingController _habitDescriptionController =
-      TextEditingController();
-  final TextEditingController _habitGoalController = TextEditingController();
-  final TextEditingController _habitMeasurementController =
-      TextEditingController();
+  final _habitNameController = TextEditingController();
+  final _habitDescriptionController = TextEditingController();
+  final _habitGoalController = TextEditingController();
+  final _habitMeasurementController = TextEditingController();
 
-  bool _othersCanParticipate = true;
+  final _nameFocus = FocusNode();
+  final _descriptionFocus = FocusNode();
+  final _goalFocus = FocusNode();
+  final _measurementFocus = FocusNode();
+
+  String _habitName = '';
+  String _habitDescription = '';
+  final String _creatorId = 'sample_creator_id';
   double _habitGoal = 0;
+  String _measurement = '';
+  final bool _isActive = true;
+  bool _othersCanParticipate = true;
+  final DateTime _creationDateTime = DateTime.now();
+
+  bool _isLoading = false;
+
+  Habit previewHabit = Habit(
+    name: '',
+    description: '',
+    creatorId: '',
+    goal: 0.0,
+    measurement: 'none',
+    isActive: false,
+    isPrivate: false,
+    creationDate: DateTime.now(),
+  );
 
   @override
   void dispose() {
@@ -34,16 +57,34 @@ class _AddHabitPageState extends State<AddHabitPage> {
     super.dispose();
   }
 
+  void _updatePreviewHabit() {
+    setState(() {
+      previewHabit = Habit(
+          name: _habitName,
+          description: _habitDescription,
+          creatorId: _creatorId,
+          goal: _habitGoal,
+          measurement: _measurement,
+          isActive: _isActive,
+          isPrivate: _othersCanParticipate,
+          creationDate: _creationDateTime);
+    });
+  }
+
   void _submitForm() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     if (_formKey.currentState!.validate()) {
       try {
         Habit newHabit = Habit(
-          name: _habitNameController.text,
-          description: _habitDescriptionController.text,
+          name: _habitName,
+          description: _habitDescription,
           creatorId: "your_creator_id",
           goal: _habitGoal,
-          measurement: _habitMeasurementController.text,
-          isActive: true,
+          measurement: _measurement,
+          isActive: _isActive,
           isPrivate: !_othersCanParticipate,
           creationDate: DateTime.now(),
         );
@@ -57,9 +98,16 @@ class _AddHabitPageState extends State<AddHabitPage> {
         }
       } catch (e) {
         print("Failed to create a habit: $e");
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     } else {
       print("Form validation failed.");
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -70,7 +118,13 @@ class _AddHabitPageState extends State<AddHabitPage> {
         backgroundColor: Colors.grey,
       ),
       backgroundColor: Colors.blue,
-      body: SafeArea(
+      body: GestureDetector(
+        onTap: () {
+          _nameFocus.unfocus();
+          _descriptionFocus.unfocus();
+          _measurementFocus.unfocus();
+          _goalFocus.unfocus();
+        },
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -84,24 +138,21 @@ class _AddHabitPageState extends State<AddHabitPage> {
                     children: [
                       // habit name input field
                       TextFormField(
-                        controller: _habitNameController,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          hintText: "Habit name...",
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _habitNameController.text = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter a habit name";
-                          }
-                          return null;
-                        },
-                      ),
+                          controller: _habitNameController,
+                          keyboardType: TextInputType.text,
+                          focusNode: _nameFocus,
+                          decoration: const InputDecoration(
+                            hintText: "Habit name...",
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _habitName = value.trim();
+                              _updatePreviewHabit();
+                            });
+                          },
+                          validator: (value) => FormValidator.validateRequired(
+                              'Habit name', value!)),
 
                       const SizedBox(
                         height: 20,
@@ -112,16 +163,17 @@ class _AddHabitPageState extends State<AddHabitPage> {
                         controller: _habitDescriptionController,
                         maxLines: 5,
                         keyboardType: TextInputType.multiline,
+                        focusNode: _descriptionFocus,
                         decoration: const InputDecoration(
                           hintText: "Habit description",
                           border: OutlineInputBorder(),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter a habit description";
-                          }
-                          return null;
+                        onChanged: (value) {
+                          _habitDescription = value.trim();
+                          _updatePreviewHabit();
                         },
+                        validator: (value) => FormValidator.validateRequired(
+                            "Habit description", value!),
                       ),
 
                       const SizedBox(
@@ -137,6 +189,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                         controller: _habitGoalController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
+                        focusNode: _goalFocus,
                         decoration: const InputDecoration(
                           hintText: "1.5, 60, 500, ...",
                           border: OutlineInputBorder(),
@@ -147,15 +200,12 @@ class _AddHabitPageState extends State<AddHabitPage> {
                                 num.tryParse(value.replaceAll(',', '.'));
                             if (parsedGoal != null) {
                               _habitGoal = parsedGoal.toDouble();
+                              _updatePreviewHabit();
                             }
                           });
                         },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter a daily goal";
-                          }
-                          return null;
-                        },
+                        validator: (value) => FormValidator.validateRequired(
+                            'Daily goal', value!),
                       ),
 
                       const SizedBox(
@@ -170,21 +220,19 @@ class _AddHabitPageState extends State<AddHabitPage> {
                       TextFormField(
                         controller: _habitMeasurementController,
                         keyboardType: TextInputType.text,
+                        focusNode: _measurementFocus,
                         decoration: const InputDecoration(
                           hintText: "km, m, h, min, pages, lines of code, ...",
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {
                           setState(() {
-                            _habitMeasurementController.text = value;
+                            _measurement = value.trim();
+                            _updatePreviewHabit();
                           });
                         },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter a measurement";
-                          }
-                          return null;
-                        },
+                        validator: (value) => FormValidator.validateRequired(
+                            'Measurement', value!),
                       ),
 
                       const SizedBox(
@@ -204,6 +252,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                               onChanged: (bool newValue) {
                                 setState(() {
                                   _othersCanParticipate = newValue;
+                                  _updatePreviewHabit();
                                 });
                               })
                         ],
@@ -217,17 +266,14 @@ class _AddHabitPageState extends State<AddHabitPage> {
                 ),
 
                 // HABIT PREVIEW
-                // const Text("Preview"),
-                // HabitTile(
-                //     habitName: _habitNameController.text,
-                //     habitDescription: _habitDescriptionController.text,
-                //     habitGoal: _habitGoal,
-                //     habitMeasurement: _habitMeasurementController.text,
-                //     isPrivate: _othersCanParticipate),
+                const Text("Preview"),
+                HabitTile(habit: previewHabit),
 
                 ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text("Create Habit"),
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text("Create Habit"),
                 ),
               ],
             ),
