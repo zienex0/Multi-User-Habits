@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multiuser_habits/auth_gate.dart';
 import 'package:multiuser_habits/pages/habits_page.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -26,7 +27,7 @@ class MainApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        home: HabitsPage(),
+        home: const AuthGate(),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSwatch(
             primarySwatch: Colors.grey,
