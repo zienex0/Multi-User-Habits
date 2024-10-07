@@ -5,10 +5,10 @@ class DbUsers {
   CollectionReference userCollection =
       FirebaseFirestore.instance.collection('users');
 
-  Future<User?> getUserData(String userId) async {
+  Future<CustomUser?> getUserData(String userId) async {
     DocumentSnapshot userDoc = await userCollection.doc(userId).get();
     if (userDoc.exists) {
-      return User.fromFirestore(userDoc);
+      return CustomUser.fromFirestore(userDoc);
     } else {
       return null;
     }

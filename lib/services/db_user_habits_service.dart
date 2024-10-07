@@ -21,7 +21,7 @@ class DbUserHabits {
     return allHabitCompletionHistory;
   }
 
-  Future<List<User>> getAllUniqueUsersFromHabit(String habitId) async {
+  Future<List<CustomUser>> getAllUniqueUsersFromHabit(String habitId) async {
     QuerySnapshot habitHistory =
         await userHabits.where('habitId', isEqualTo: habitId).get();
 
@@ -31,9 +31,9 @@ class DbUserHabits {
       uniqueUserIdsFromHabit.add(doc['userId'] as String);
     }
 
-    List<User> uniqueUsers = [];
+    List<CustomUser> uniqueUsers = [];
     for (var userId in uniqueUserIdsFromHabit) {
-      User? user = await dbUsers.getUserData(userId);
+      CustomUser? user = await dbUsers.getUserData(userId);
       if (user != null) {
         uniqueUsers.add(user);
       }

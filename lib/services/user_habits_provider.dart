@@ -12,12 +12,12 @@ class UserHabitsProvider extends ChangeNotifier {
   UserHabitsProvider(this.habitId);
 
   List<UserHabit> _habitCompletions = [];
-  List<User> _habitUsers = [];
+  List<CustomUser> _habitUsers = [];
   bool _isLoadingHabitCompletions = false;
   bool _isLoadingHabitUsers = false;
 
   List<UserHabit> get habitCompletions => _habitCompletions;
-  List<User> get habitUsers => _habitUsers;
+  List<CustomUser> get habitUsers => _habitUsers;
   bool get isLoadingHabitCompletions => _isLoadingHabitCompletions;
   bool get isLoadingHabitUsers => _isLoadingHabitUsers;
 

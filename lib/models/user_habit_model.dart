@@ -11,7 +11,7 @@ class UserHabit {
   final String userNote;
   final String habitId;
   final String userId;
-  late User? user;
+  late CustomUser? user;
   late Habit? habit;
 
   UserHabit(

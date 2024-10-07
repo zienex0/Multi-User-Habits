@@ -1,30 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class User {
+class CustomUser {
   final String id;
+  final String uid;
   final String email;
   final String displayName;
+  final String? photoUrl;
 
-  User({required this.id, required this.email, required this.displayName});
+  CustomUser(
+      {required this.id,
+      required this.uid,
+      required this.email,
+      required this.displayName,
+      required this.photoUrl});
 
-  factory User.fromFirestore(DocumentSnapshot doc) {
+  factory CustomUser.fromFirestore(DocumentSnapshot doc) {
     if (!doc.exists || doc.data() == null) {
       throw Exception('User document doesnt exist or is null');
     }
 
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    return User(
+    return CustomUser(
         id: doc.id,
+        uid: doc['uid'],
         email: data['email'] ?? '',
-        displayName: data['displayName'] ?? 'Anonymous');
+        displayName: data['displayName'] ?? 'Anonymous',
+        photoUrl: data['photoUrl']);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      'id': uid,
       'email': email,
       'displayName': displayName,
+      'photoUrl': photoUrl,
     };
   }
 }
