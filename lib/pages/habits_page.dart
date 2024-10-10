@@ -18,7 +18,7 @@ class _HabitsPageState extends State<HabitsPage> {
     super.initState();
     Future.microtask(() => context
         .read<HabitsProvider>()
-        .fetchUniqueHabitsFromUserUid(_auth.currentUser!.uid));
+        .fetchHabitsConnectedToUser(userUid: _auth.currentUser!.uid));
   }
 
   @override

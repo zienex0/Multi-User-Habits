@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:multiuser_habits/models/user_model.dart';
 import 'package:multiuser_habits/pages/habits_page.dart';
 import 'package:multiuser_habits/services/db_users_service.dart';
 import 'package:multiuser_habits/services/form_validator.dart';
@@ -42,12 +41,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
         User? user = userCredential.user;
         if (user != null) {
-          CustomUser customUser = CustomUser(
+          await dbUsers.addCustomUser(
               uid: user.uid,
-              email: _emailController.text.trim(),
               displayName: _displayNameController.text.trim(),
-              photoUrl: null);
-          await dbUsers.addCustomUser(customUser);
+              email: _emailController.text.trim(),
+              photoUrl: '');
 
           if (context.mounted) {
             Navigator.pushReplacement(

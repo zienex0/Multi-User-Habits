@@ -5,14 +5,7 @@ class DbHabits {
   CollectionReference habitCollection =
       FirebaseFirestore.instance.collection('habits');
 
-  Future<List<Habit>> getAllHabits() async {
-    QuerySnapshot snapshot = await habitCollection.get();
-    List<Habit> habits =
-        snapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
-    return habits;
-  }
-
-  Future<Habit?> getHabitData(String habitId) async {
+  Future<Habit?> getHabit(String habitId) async {
     try {
       DocumentSnapshot habitDoc = await habitCollection.doc(habitId).get();
       if (habitDoc.exists) {
@@ -26,15 +19,51 @@ class DbHabits {
     }
   }
 
-  Future<Habit?> addHabit(Habit habit) async {
+  Future<List<Habit>> getUserConnectedHabits(String userUid) async {
     try {
-      DocumentReference docRef = await habitCollection.add(habit.toMap());
+      QuerySnapshot querySnapshot =
+          await habitCollection.where('userUids', arrayContains: userUid).get();
+      List<Habit> habits =
+          querySnapshot.docs.map((doc) => Habit.fromFirestore(doc)).toList();
+      return habits;
+    } catch (e) {
+      print("Error while getting user connected habits: $e");
+      return [];
+    }
+  }
 
-      habit.id = docRef.id;
+  Future<Habit?> addHabit(
+      {required String title,
+      required String description,
+      required Timestamp creationDate,
+      required String measurement,
+      required double dailyGoal,
+      required String creatorUid,
+      required String joinCode,
+      required List<String> userUids}) async {
+    try {
+      DocumentReference docRef = await habitCollection.add({
+        'title': title,
+        'description': description,
+        'creationDate': creationDate,
+        'measurement': measurement,
+        'dailyGoal': dailyGoal,
+        'creatorUid': creatorUid,
+        'joinCode': joinCode,
+        'userUids': userUids
+      });
 
-      // await docRef.update({'id': habit.id});
-
-      print("Created a new habit with id: ${habit.id}");
+      Habit habit = Habit(
+          id: docRef.id,
+          title: title,
+          description: description,
+          creatorUid: creatorUid,
+          dailyGoal: dailyGoal,
+          joinCode: joinCode,
+          measurement: measurement,
+          creationDate: creationDate.toDate(),
+          userUids: userUids);
+      print("Created a new habit with id: ${docRef.id}");
       return habit;
     } catch (error) {
       print("Failed to add a new habit: $error");

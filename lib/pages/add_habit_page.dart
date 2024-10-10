@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
@@ -15,11 +16,12 @@ class AddHabitPage extends StatefulWidget {
 }
 
 class _AddHabitPageState extends State<AddHabitPage> {
+  final _currentUserUid = FirebaseAuth.instance.currentUser!.uid;
   final _formKey = GlobalKey<FormState>();
 
-  final _habitNameController = TextEditingController();
+  final _habitTitleController = TextEditingController();
   final _habitDescriptionController = TextEditingController();
-  final _habitGoalController = TextEditingController();
+  final _habitDailyGoalController = TextEditingController();
   final _habitMeasurementController = TextEditingController();
 
   final _nameFocus = FocusNode();
@@ -27,37 +29,30 @@ class _AddHabitPageState extends State<AddHabitPage> {
   final _goalFocus = FocusNode();
   final _measurementFocus = FocusNode();
 
-  String _habitName = '';
+  String _habitTitle = '';
   String _habitDescription = '';
-  final String _creatorUid = FirebaseAuth.instance.currentUser != null
-      ? FirebaseAuth.instance.currentUser!.uid
-      : 'CREATOR_ID_NONE';
-  double _habitGoal = 0;
+  double _habitDailyGoal = 0;
   String _measurement = '';
-  final bool _isActive = true;
-  bool _othersCanParticipate = true;
   final DateTime _creationDateTime = DateTime.now();
 
   bool _isLoading = false;
 
   Habit previewHabit = Habit(
-    name: '',
-    description: '',
-    creatorUid: FirebaseAuth.instance.currentUser != null
-        ? FirebaseAuth.instance.currentUser!.uid
-        : 'CREATOR_ID_NONE',
-    goal: 0.0,
-    measurement: 'none',
-    isActive: false,
-    isPrivate: false,
-    creationDate: DateTime.now(),
-  );
+      id: 'PREVIEW_HABIT_ID',
+      title: '',
+      description: '',
+      creatorUid: FirebaseAuth.instance.currentUser!.uid,
+      joinCode: 'PREVIEW_JOIN_CODE',
+      dailyGoal: 0.0,
+      measurement: 'none',
+      creationDate: DateTime.now(),
+      userUids: [FirebaseAuth.instance.currentUser!.uid]);
 
   @override
   void dispose() {
-    _habitNameController.dispose();
+    _habitTitleController.dispose();
     _habitDescriptionController.dispose();
-    _habitGoalController.dispose();
+    _habitDailyGoalController.dispose();
     _habitMeasurementController.dispose();
     super.dispose();
   }
@@ -65,14 +60,15 @@ class _AddHabitPageState extends State<AddHabitPage> {
   void _updatePreviewHabit() {
     setState(() {
       previewHabit = Habit(
-          name: _habitName,
+          id: 'PREVIEW_HABIT_ID',
+          title: _habitTitle,
           description: _habitDescription,
-          creatorUid: _creatorUid,
-          goal: _habitGoal,
+          creatorUid: _currentUserUid,
+          dailyGoal: _habitDailyGoal,
+          joinCode: 'PREVIEW_JOIN_CODE',
           measurement: _measurement,
-          isActive: _isActive,
-          isPrivate: _othersCanParticipate,
-          creationDate: _creationDateTime);
+          creationDate: _creationDateTime,
+          userUids: [_currentUserUid]);
     });
   }
 
@@ -83,22 +79,26 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
     if (_formKey.currentState!.validate()) {
       try {
-        Habit newHabit = Habit(
-          name: _habitName,
-          description: _habitDescription,
-          creatorUid: _creatorUid,
-          goal: _habitGoal,
-          measurement: _measurement,
-          isActive: _isActive,
-          isPrivate: !_othersCanParticipate,
-          creationDate: DateTime.now(),
-        );
+        final Habit? habit = await DbHabits().addHabit(
+            title: _habitTitle,
+            description: _habitDescription,
+            creatorUid: _currentUserUid,
+            creationDate: Timestamp.now(),
+            measurement: _measurement,
+            dailyGoal: _habitDailyGoal,
+            joinCode: 'CHANGE THIS CODE LATER',
+            userUids: [_currentUserUid]);
 
-        await DbHabits().addHabit(newHabit);
+        if (habit == null) {
+          throw "Failed to create a habit when submiting";
+        }
+
+        print("Habit successfuly created with id ${habit.id}");
 
         if (mounted) {
-          context.read<HabitsProvider>().fetchUniqueHabitsFromUserUid(
-              FirebaseAuth.instance.currentUser!.uid);
+          context
+              .read<HabitsProvider>()
+              .fetchHabitsConnectedToUser(userUid: _currentUserUid);
           Navigator.pop(context);
           print("Form submitted successfully and habit created");
         }
@@ -144,7 +144,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                     children: [
                       // habit name input field
                       TextFormField(
-                          controller: _habitNameController,
+                          controller: _habitTitleController,
                           keyboardType: TextInputType.text,
                           focusNode: _nameFocus,
                           decoration: const InputDecoration(
@@ -153,7 +153,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                           ),
                           onChanged: (value) {
                             setState(() {
-                              _habitName = value.trim();
+                              _habitTitle = value.trim();
                               _updatePreviewHabit();
                             });
                           },
@@ -192,7 +192,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                         style: TextStyle(fontSize: 20),
                       ),
                       TextFormField(
-                        controller: _habitGoalController,
+                        controller: _habitDailyGoalController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         focusNode: _goalFocus,
@@ -205,7 +205,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                             num? parsedGoal =
                                 num.tryParse(value.replaceAll(',', '.'));
                             if (parsedGoal != null) {
-                              _habitGoal = parsedGoal.toDouble();
+                              _habitDailyGoal = parsedGoal.toDouble();
                               _updatePreviewHabit();
                             }
                           });
@@ -244,25 +244,6 @@ class _AddHabitPageState extends State<AddHabitPage> {
                       const SizedBox(
                         height: 20,
                       ),
-
-                      // is habit available for other users
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Other users can \nparticipate in this habit',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          Switch(
-                              value: _othersCanParticipate,
-                              onChanged: (bool newValue) {
-                                setState(() {
-                                  _othersCanParticipate = newValue;
-                                  _updatePreviewHabit();
-                                });
-                              })
-                        ],
-                      )
                     ],
                   ),
                 ),

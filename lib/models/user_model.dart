@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomUser {
-  String? id;
-  final String uid;
+  final String id;
   final String email;
   final String displayName;
-  final String? photoUrl;
+  final String photoUrl;
 
   CustomUser(
-      {this.id,
-      required this.uid,
+      {required this.id,
       required this.email,
       required this.displayName,
       required this.photoUrl});
@@ -23,15 +21,13 @@ class CustomUser {
 
     return CustomUser(
         id: doc.id,
-        uid: doc['uid'],
-        email: data['email'] ?? '',
+        email: data['email'],
         displayName: data['displayName'] ?? 'Anonymous',
         photoUrl: data['photoUrl']);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'uid': uid,
       'email': email,
       'displayName': displayName,
       'photoUrl': photoUrl,

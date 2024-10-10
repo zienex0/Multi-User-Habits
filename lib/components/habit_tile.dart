@@ -32,18 +32,16 @@ class HabitTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        habit.name.isNotEmpty ? habit.name : 'No habit name',
+                        habit.title.isNotEmpty ? habit.title : 'No habit name',
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        'Goal: ${habit.goal} ${habit.measurement}',
+                        'Goal: ${habit.dailyGoal} ${habit.measurement}',
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w200),
                       ),
-                      habit.id == null
-                          ? const Text("Something went wrong...")
-                          : HabitUsersAvatars(habitId: habit.id!)
+                      // HabitUsersAvatars(habitId: habit.id)
                     ],
                   ),
                 ),

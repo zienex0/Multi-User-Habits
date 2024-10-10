@@ -1,28 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Habit {
-  String? id;
-  String name;
+  final String id;
+  String title;
   String description;
   final String creatorUid;
-  double goal;
+  double dailyGoal;
+  String joinCode;
   String measurement;
-  bool isActive;
-  bool isPrivate;
   DateTime creationDate;
-
-  // FREQUENCY IS NOT IMPORTANT, ALL HABITS WILL BE DAILY
+  List<String> userUids;
 
   Habit(
-      {this.id,
-      required this.name,
+      {required this.id,
+      required this.title,
       required this.description,
       required this.creatorUid,
-      required this.goal,
+      required this.dailyGoal,
+      required this.joinCode,
       required this.measurement,
-      required this.isActive,
-      required this.isPrivate,
-      required this.creationDate});
+      required this.creationDate,
+      required this.userUids});
 
   factory Habit.fromFirestore(DocumentSnapshot doc) {
     if (!doc.exists || doc.data() == null) {
@@ -32,30 +30,30 @@ class Habit {
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>;
 
     return Habit(
-        id: doc.id,
-        name: data['name'],
-        description: data['description'] ?? '',
-        creatorUid: data['creatorUid'],
-        goal: (data['goal'] is int)
-            ? (data['goal'] as int).toDouble()
-            : data['goal'] as double,
-        isActive: data['isActive'] ?? false,
-        isPrivate: data['isPrivate'],
-        measurement: data['measurement'] ?? '',
-        creationDate: (data['creationDate'] as Timestamp).toDate());
+      id: doc.id,
+      title: data['title'],
+      description: data['description'],
+      creatorUid: data['creatorUid'],
+      dailyGoal: (data['dailyGoal'] is int)
+          ? (data['dailyGoal'] as int).toDouble()
+          : data['dailyGoal'] as double,
+      joinCode: data['joinCode'],
+      measurement: data['measurement'],
+      creationDate: (data['creationDate'] as Timestamp).toDate(),
+      userUids: List<String>.from(data['userUids'] ?? []),
+    );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      // 'id': id,
-      'name': name,
+      'title': title,
       'description': description,
       'creatorUid': creatorUid,
-      'goal': goal,
-      'isActive': isActive,
-      'isPrivate': isPrivate,
+      'dailyGoal': dailyGoal,
+      'joinCode': joinCode,
       'measurement': measurement,
       'creationDate': Timestamp.fromDate(creationDate),
+      'userUids': userUids,
     };
   }
 }

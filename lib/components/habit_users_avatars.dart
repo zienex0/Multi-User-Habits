@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/models/user_model.dart';
-import 'package:multiuser_habits/services/db_user_habits_service.dart';
+import 'package:multiuser_habits/services/db_users_service.dart';
 
 class HabitUsersAvatars extends StatefulWidget {
   const HabitUsersAvatars({required this.habitId, super.key});
@@ -12,11 +12,11 @@ class HabitUsersAvatars extends StatefulWidget {
 }
 
 class _HabitUsersAvatarsState extends State<HabitUsersAvatars> {
-  final DbUserHabits dbUserHabits = DbUserHabits();
+  final DbUsers dbUsersCollection = DbUsers();
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: dbUserHabits.getAllUniqueUsersFromHabit(widget.habitId),
+        future: dbUsersCollection.getUsersConnectedToHabit(widget.habitId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
