@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
@@ -28,7 +29,9 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
   String _habitName = '';
   String _habitDescription = '';
-  final String _creatorId = 'sample_creator_id';
+  final String _creatorUid = FirebaseAuth.instance.currentUser != null
+      ? FirebaseAuth.instance.currentUser!.uid
+      : 'CREATOR_ID_NONE';
   double _habitGoal = 0;
   String _measurement = '';
   final bool _isActive = true;
@@ -40,7 +43,9 @@ class _AddHabitPageState extends State<AddHabitPage> {
   Habit previewHabit = Habit(
     name: '',
     description: '',
-    creatorId: '',
+    creatorUid: FirebaseAuth.instance.currentUser != null
+        ? FirebaseAuth.instance.currentUser!.uid
+        : 'CREATOR_ID_NONE',
     goal: 0.0,
     measurement: 'none',
     isActive: false,
@@ -62,7 +67,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
       previewHabit = Habit(
           name: _habitName,
           description: _habitDescription,
-          creatorId: _creatorId,
+          creatorUid: _creatorUid,
           goal: _habitGoal,
           measurement: _measurement,
           isActive: _isActive,
@@ -81,7 +86,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
         Habit newHabit = Habit(
           name: _habitName,
           description: _habitDescription,
-          creatorId: "your_creator_id",
+          creatorUid: _creatorUid,
           goal: _habitGoal,
           measurement: _measurement,
           isActive: _isActive,
@@ -92,7 +97,8 @@ class _AddHabitPageState extends State<AddHabitPage> {
         await DbHabits().addHabit(newHabit);
 
         if (mounted) {
-          context.read<HabitsProvider>().fetchAllHabits();
+          context.read<HabitsProvider>().fetchUniqueHabitsFromUserUid(
+              FirebaseAuth.instance.currentUser!.uid);
           Navigator.pop(context);
           print("Form submitted successfully and habit created");
         }

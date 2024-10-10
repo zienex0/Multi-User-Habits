@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
-// import 'package:multiuser_habits/models/user_model.dart';
-import 'package:multiuser_habits/services/user_habits_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:multiuser_habits/models/user_model.dart';
+import 'package:multiuser_habits/services/db_user_habits_service.dart';
 
-class HabitUsersAvatars extends StatelessWidget {
+class HabitUsersAvatars extends StatefulWidget {
   const HabitUsersAvatars({required this.habitId, super.key});
 
   final String habitId;
 
   @override
+  State<HabitUsersAvatars> createState() => _HabitUsersAvatarsState();
+}
+
+class _HabitUsersAvatarsState extends State<HabitUsersAvatars> {
+  final DbUserHabits dbUserHabits = DbUserHabits();
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        final provider = UserHabitsProvider(habitId);
-        Future.microtask(() => provider.fetchUniqueHabitUsers());
-        return provider;
-      },
-      child: Consumer<UserHabitsProvider>(
-        builder: (context, userHabitsProvider, child) {
-          if (userHabitsProvider.isLoadingHabitUsers) {
+    return FutureBuilder(
+        future: dbUserHabits.getAllUniqueUsersFromHabit(widget.habitId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
 
+          if (snapshot.hasError) {
+            print("Error while getting habit unique users for avatars");
+          }
+
+          List<CustomUser> uniqueHabitUsers = snapshot.data ?? [];
           return SizedBox(
             height: 40,
             child: Stack(
               children: [
-                for (int i = 0; i < userHabitsProvider.habitUsers.length; i++)
+                for (int i = 0; i < uniqueHabitUsers.length; i++)
                   Positioned(
                     left: i * 20.0,
                     child: const CircleAvatar(
@@ -37,8 +42,6 @@ class HabitUsersAvatars extends StatelessWidget {
               ],
             ),
           );
-        },
-      ),
-    );
+        });
   }
 }

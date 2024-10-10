@@ -1,26 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:multiuser_habits/models/user_model.dart';
 import 'package:multiuser_habits/pages/habits_page.dart';
-import 'package:multiuser_habits/services/db_users_service.dart';
 import 'package:multiuser_habits/services/form_validator.dart';
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<SignInPage> createState() => _MyWidgetState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
-  final dbUsers = DbUsers();
-
-  final _signUpFormKey = GlobalKey<FormState>();
-  final _displayNameController = TextEditingController();
+class _MyWidgetState extends State<SignInPage> {
+  final _signInFormKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final _displayNameFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
@@ -28,28 +22,20 @@ class _SignUpPageState extends State<SignUpPage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> _signUp() async {
+  Future<void> _signIn() async {
     setState(() {
       _isLoading = true;
     });
 
-    if (_signUpFormKey.currentState!.validate()) {
+    if (_signInFormKey.currentState!.validate()) {
       try {
-        UserCredential userCredential =
-            await _auth.createUserWithEmailAndPassword(
-                email: _emailController.text.trim(),
-                password: _passwordController.text.trim());
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim());
 
         User? user = userCredential.user;
         if (user != null) {
-          CustomUser customUser = CustomUser(
-              uid: user.uid,
-              email: _emailController.text.trim(),
-              displayName: _displayNameController.text.trim(),
-              photoUrl: null);
-          await dbUsers.addCustomUser(customUser);
-
-          if (context.mounted) {
+          if (mounted) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -60,23 +46,26 @@ class _SignUpPageState extends State<SignUpPage> {
         }
       } on FirebaseAuthException catch (e) {
         print(
-            'FirebaseAuthException when creating user with email and password: $e');
+            'FirebaseAuthException when signing user up with email and password: $e');
       } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _displayNameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -85,12 +74,11 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sign Up"),
+        title: const Text("Sign In"),
       ),
       body: GestureDetector(
         onTap: () {
           setState(() {
-            _displayNameFocus.unfocus();
             _emailFocus.unfocus();
             _passwordFocus.unfocus();
           });
@@ -101,25 +89,10 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: const EdgeInsets.only(
                   right: 20, left: 20, top: 200, bottom: 100),
               child: Form(
-                key: _signUpFormKey,
+                key: _signInFormKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // display name field
-                    TextFormField(
-                      controller: _displayNameController,
-                      focusNode: _displayNameFocus,
-                      decoration: const InputDecoration(
-                        labelText: 'Display name',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) => FormValidator.validateRequired(
-                          'Display name', value!),
-                    ),
-
-                    const SizedBox(
-                      height: 20,
-                    ),
                     // email field
                     TextFormField(
                       controller: _emailController,
@@ -128,7 +101,8 @@ class _SignUpPageState extends State<SignUpPage> {
                         labelText: 'Email',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) => FormValidator.validateEmail(value!),
+                      validator: (value) =>
+                          FormValidator.validateRequired('Email', value!),
                     ),
 
                     const SizedBox(
@@ -145,15 +119,15 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       obscureText: true,
                       validator: (value) =>
-                          FormValidator.validatePassword(value!),
+                          FormValidator.validateRequired('Password', value!),
                     ),
 
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: _signUp,
+                      onPressed: _signIn,
                       child: _isLoading
                           ? const CircularProgressIndicator()
-                          : const Text('Sign Up'),
+                          : const Text('Sign In'),
                     )
                   ],
                 ),

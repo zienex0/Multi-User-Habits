@@ -11,18 +11,21 @@ class UserHabit {
   final String userNote;
   final String habitId;
   final String userUid;
+  bool isInitial;
   late CustomUser? user;
   late Habit? habit;
 
-  UserHabit(
-      {required this.id,
-      required this.completionDate,
-      required this.quantity,
-      required this.userNote,
-      required this.habitId,
-      required this.userUid,
-      this.user,
-      this.habit});
+  UserHabit({
+    required this.id,
+    required this.completionDate,
+    required this.quantity,
+    required this.userNote,
+    required this.habitId,
+    required this.userUid,
+    required this.isInitial,
+    this.user,
+    this.habit,
+  });
 
   factory UserHabit.fromFirestore(DocumentSnapshot doc) {
     if (!doc.exists || doc.data() == null) {
@@ -43,7 +46,8 @@ class UserHabit {
         quantity: quantity,
         userNote: data['userNote'] ?? '',
         habitId: data['habitId'],
-        userUid: data['userUid']);
+        userUid: data['userUid'],
+        isInitial: data['isInitial']);
   }
 
   Future<void> fetchAndAssignUserAndHabit() async {
@@ -72,4 +76,6 @@ class UserHabit {
           "Error while fetching and assigning habit. Habit with id $habitId not found.");
     }
   }
+
+  // Map<String, dynamic> toMap() {}
 }

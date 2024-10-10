@@ -26,20 +26,19 @@ class DbHabits {
     }
   }
 
-  Future<void> addHabit(Habit habit) async {
+  Future<Habit?> addHabit(Habit habit) async {
     try {
-      // Create the habit without an id first
       DocumentReference docRef = await habitCollection.add(habit.toMap());
 
-      // Once the document is added, update the habit's id with Firestore's generated id
       habit.id = docRef.id;
 
-      // Update the document in Firestore with the id
-      await docRef.update({'id': habit.id});
+      // await docRef.update({'id': habit.id});
 
       print("Created a new habit with id: ${habit.id}");
+      return habit;
     } catch (error) {
       print("Failed to add a new habit: $error");
+      return null;
     }
   }
 }

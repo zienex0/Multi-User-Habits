@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
 import 'package:multiuser_habits/pages/add_habit_page.dart';
@@ -11,28 +12,39 @@ class HabitsPage extends StatefulWidget {
 }
 
 class _HabitsPageState extends State<HabitsPage> {
+  final _auth = FirebaseAuth.instance;
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<HabitsProvider>().fetchAllHabits());
+    Future.microtask(() => context
+        .read<HabitsProvider>()
+        .fetchUniqueHabitsFromUserUid(_auth.currentUser!.uid));
   }
 
   @override
   Widget build(BuildContext context) {
     final habitsProvider = context.watch<HabitsProvider>();
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton.outlined(
+            onPressed: () async {
+              await _auth.signOut();
+              if (!mounted) return;
+            },
+            icon: const Icon(Icons.logout_outlined)),
+      ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddHabitPage(),
+              builder: (context) => const AddHabitPage(),
             ),
           );
         },
       ),
-      body: habitsProvider.isLoadingFetchingAllHabits
+      body: habitsProvider.isLoadingHabits
           ? const Center(
               child: CircularProgressIndicator(),
             )

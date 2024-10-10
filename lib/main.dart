@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/auth_gate.dart';
-import 'package:multiuser_habits/pages/habits_page.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:multiuser_habits/firebase_options.dart';

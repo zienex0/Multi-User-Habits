@@ -4,7 +4,7 @@ class Habit {
   String? id;
   String name;
   String description;
-  final String creatorId;
+  final String creatorUid;
   double goal;
   String measurement;
   bool isActive;
@@ -17,7 +17,7 @@ class Habit {
       {this.id,
       required this.name,
       required this.description,
-      required this.creatorId,
+      required this.creatorUid,
       required this.goal,
       required this.measurement,
       required this.isActive,
@@ -35,7 +35,7 @@ class Habit {
         id: doc.id,
         name: data['name'],
         description: data['description'] ?? '',
-        creatorId: data['creatorId'],
+        creatorUid: data['creatorUid'],
         goal: (data['goal'] is int)
             ? (data['goal'] as int).toDouble()
             : data['goal'] as double,
@@ -47,10 +47,10 @@ class Habit {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      // 'id': id,
       'name': name,
       'description': description,
-      'creatorId': creatorId,
+      'creatorUid': creatorUid,
       'goal': goal,
       'isActive': isActive,
       'isPrivate': isPrivate,
