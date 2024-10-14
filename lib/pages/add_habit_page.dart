@@ -254,7 +254,10 @@ class _AddHabitPageState extends State<AddHabitPage> {
 
                 // HABIT PREVIEW
                 const Text("Preview"),
-                HabitTile(habit: previewHabit),
+                HabitTile(
+                  habit: previewHabit,
+                  preview: true,
+                ),
 
                 ElevatedButton(
                   onPressed: _isLoading ? null : _submitForm,

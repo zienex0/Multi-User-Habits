@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
 import 'package:multiuser_habits/pages/add_habit_page.dart';
+import 'package:multiuser_habits/pages/authentication_page.dart';
 import 'package:multiuser_habits/services/habits_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -26,12 +27,17 @@ class _HabitsPageState extends State<HabitsPage> {
     final habitsProvider = context.watch<HabitsProvider>();
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton.outlined(
+        leading: IconButton(
             onPressed: () async {
               await _auth.signOut();
-              if (!mounted) return;
+              if (mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                      builder: (context) => const AuthenticationPage()),
+                );
+              }
             },
-            icon: const Icon(Icons.logout_outlined)),
+            icon: const Icon(Icons.logout)),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
