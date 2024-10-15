@@ -1,5 +1,5 @@
 class FormValidator {
-  static final String _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+  static const String _emailRegex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
 
   static String? validateEmail(String email) {
     email = email.trim();

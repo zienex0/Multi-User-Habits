@@ -148,7 +148,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
                           keyboardType: TextInputType.text,
                           focusNode: _nameFocus,
                           decoration: const InputDecoration(
-                            hintText: "Habit name...",
+                            hintText: "Running",
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (value) {
@@ -171,7 +171,8 @@ class _AddHabitPageState extends State<AddHabitPage> {
                         keyboardType: TextInputType.multiline,
                         focusNode: _descriptionFocus,
                         decoration: const InputDecoration(
-                          hintText: "Habit description",
+                          hintText:
+                              "Let's run everyday to build up our habit score to the max!",
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {

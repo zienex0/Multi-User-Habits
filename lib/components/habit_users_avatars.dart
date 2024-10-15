@@ -2,21 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:multiuser_habits/models/user_model.dart';
 import 'package:multiuser_habits/services/db_users_service.dart';
 
-class HabitUsersAvatars extends StatefulWidget {
-  const HabitUsersAvatars({required this.habitId, super.key});
+class HabitUsersAvatars extends StatelessWidget {
+  HabitUsersAvatars({required this.habitId, required this.preview, super.key});
 
   final String habitId;
+  final bool preview;
 
-  @override
-  State<HabitUsersAvatars> createState() => _HabitUsersAvatarsState();
-}
-
-class _HabitUsersAvatarsState extends State<HabitUsersAvatars> {
   final DbUsers dbUsersCollection = DbUsers();
+
   @override
   Widget build(BuildContext context) {
+    if (preview) {
+      List<CustomUser> customUserPreviewList = [
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+        CustomUser(id: '', email: '', displayName: '', photoUrl: ''),
+      ];
+      return _buildHabitUsersAvatars(customUserPreviewList);
+    }
+
     return FutureBuilder(
-        future: dbUsersCollection.getUsersConnectedToHabit(widget.habitId),
+        future: dbUsersCollection.getUsersConnectedToHabit(habitId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -27,21 +38,37 @@ class _HabitUsersAvatarsState extends State<HabitUsersAvatars> {
           }
 
           List<CustomUser> uniqueHabitUsers = snapshot.data ?? [];
-          return SizedBox(
-            height: 40,
-            child: Stack(
-              children: [
-                for (int i = 0; i < uniqueHabitUsers.length; i++)
-                  Positioned(
-                    left: i * 20.0,
-                    child: const CircleAvatar(
-                      radius: 20,
-                      child: Icon(Icons.person),
-                    ),
-                  )
-              ],
-            ),
-          );
+          return _buildHabitUsersAvatars(uniqueHabitUsers);
         });
   }
+}
+
+_buildHabitUsersAvatars(List<CustomUser> usersList) {
+  return SizedBox(
+    height: 40,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        for (int i = 0; i < usersList.length && i < 3; i++)
+          if (i < 3)
+            const CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.person,
+                color: Colors.black,
+              ),
+            ),
+        if (usersList.length > 4)
+          CircleAvatar(
+            backgroundColor: Colors.transparent,
+            radius: 18,
+            child: Text(
+              "+${usersList.length - 3}",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+      ],
+    ),
+  );
 }

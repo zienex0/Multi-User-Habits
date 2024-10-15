@@ -26,6 +26,7 @@ class _HabitsPageState extends State<HabitsPage> {
   Widget build(BuildContext context) {
     final habitsProvider = context.watch<HabitsProvider>();
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(46, 46, 46, 1),
       appBar: AppBar(
         leading: IconButton(
             onPressed: () async {
