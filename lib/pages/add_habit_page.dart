@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
 import 'package:multiuser_habits/services/form_validator.dart';
 import 'package:multiuser_habits/services/habits_provider.dart';
 import 'package:multiuser_habits/services/db_habits_service.dart';
+import 'package:multiuser_habits/utilities.dart';
 import 'package:provider/provider.dart';
 
 class AddHabitPage extends StatefulWidget {
@@ -196,9 +198,12 @@ class _AddHabitPageState extends State<AddHabitPage> {
                         controller: _habitDailyGoalController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
+                        inputFormatters: [
+                          filteringTextInputOnlyNumbersWithDecimalPoint
+                        ],
                         focusNode: _goalFocus,
                         decoration: const InputDecoration(
-                          hintText: "1.5, 60, 500, ...",
+                          hintText: "99 999, 6.5, 10, ...",
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {

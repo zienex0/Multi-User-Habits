@@ -61,7 +61,9 @@ class HabitTile extends StatelessWidget {
                 width: 10,
               ),
               // COMPLETE HABIT BUTTON ON THE RIGHT
-              const CompleteHabitButton(),
+              CompleteHabitButton(
+                habit: habit,
+              ),
             ],
           ),
         ),

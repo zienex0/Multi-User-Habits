@@ -1,0 +1,105 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:multiuser_habits/models/habit_check_model.dart';
+import 'package:multiuser_habits/services/db_habit_checks_service.dart';
+import 'package:multiuser_habits/utilities.dart';
+
+DbHabitChecks _dbHabitChecks = DbHabitChecks();
+final _auth = FirebaseAuth.instance;
+
+Future<HabitCheck?> showCompleteHabitDialog({
+  required BuildContext context,
+  required String habitMeasurement,
+  required String habitId,
+}) async {
+  final textMeasurementController = TextEditingController();
+  final textUserNoteController = TextEditingController();
+  String completionQuantityInput = '';
+  bool isLoading = false;
+
+  double? completionQuantity;
+  return showDialog<HabitCheck?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "Complete this habit",
+            style: TextStyle(fontSize: 20),
+          ),
+          // ALERT DIALOG CONTENT
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Completion quantity"),
+                // AMOUNT FIELD
+                ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(maxWidth: 100, minWidth: 100),
+                  child: TextField(
+                    autofocus: true,
+                    controller: textMeasurementController,
+                    decoration: const InputDecoration(
+                      hintText: "Amount",
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(),
+                    inputFormatters: [
+                      filteringTextInputOnlyNumbersWithDecimalPoint
+                    ],
+                    onChanged: (value) {
+                      completionQuantityInput = value.trim();
+                      completionQuantity = double.tryParse(
+                          completionQuantityInput.replaceAll(r',', '.'));
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                // USER NOTE FIELD
+                TextField(
+                  autofocus: true,
+                  controller: textUserNoteController,
+                  decoration: const InputDecoration(
+                    hintText: "Description",
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                )
+              ],
+            ),
+          ),
+          actions: [
+            // CANCEL BUTTON
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            // SUBMIT BUTTON
+            TextButton(
+              onPressed: () async {
+                if (completionQuantity != null &&
+                    _auth.currentUser != null &&
+                    !isLoading) {
+                  isLoading = true;
+                  HabitCheck? habitCheck = await _dbHabitChecks.addHabitCheck(
+                      habitId: habitId,
+                      quantity: completionQuantity!,
+                      userNote: textUserNoteController.text.trim(),
+                      userUid: _auth.currentUser!.uid);
+                  completionQuantity = null;
+                  isLoading = false;
+                  if (context.mounted) {
+                    Navigator.pop(context, habitCheck);
+                  }
+                }
+              },
+              child: const Text("Submit"),
+            ),
+          ],
+        );
+      });
+}

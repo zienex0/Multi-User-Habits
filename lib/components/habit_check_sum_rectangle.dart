@@ -20,8 +20,8 @@ class HabitCheckSumRectangle extends StatelessWidget {
       return _buildStaticRectangle("0", habitMeasurement);
     }
 
-    return FutureBuilder(
-        future: dbHabitChecks.getHabitChecksCompletionSum(habitId),
+    return StreamBuilder(
+        stream: dbHabitChecks.getHabitChecksCompletionSum(habitId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             print(
@@ -29,11 +29,20 @@ class HabitCheckSumRectangle extends StatelessWidget {
             return const Text("Something went wrong");
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return _buildStaticRectangle("...", "loading...");
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return _buildStaticRectangle("0", habitMeasurement);
+          }
+
+          if (snapshot.data!.roundToDouble() == snapshot.data) {
+            return _buildStaticRectangle(
+                snapshot.data!.toStringAsFixed(0), habitMeasurement);
           }
 
           return _buildStaticRectangle(
-              "${snapshot.data ?? 0}", habitMeasurement);
+              snapshot.data!.toStringAsFixed(1), habitMeasurement);
         });
   }
 

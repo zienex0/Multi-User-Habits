@@ -67,70 +67,71 @@ class _MyWidgetState extends State<SignInPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign In"),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          setState(() {
-            _emailFocus.unfocus();
-            _passwordFocus.unfocus();
-          });
-        },
-        child: Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  right: 20, left: 20, top: 200, bottom: 100),
-              child: Form(
-                key: _signInFormKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // email field
-                    TextFormField(
-                      controller: _emailController,
-                      focusNode: _emailFocus,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) =>
-                          FormValidator.validateRequired('Email', value!),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _emailFocus.unfocus();
+          _passwordFocus.unfocus();
+        });
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: const Text("Sign In"),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+                right: 20, left: 20, top: 200, bottom: 100),
+            child: Form(
+              key: _signInFormKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // email field
+                  TextFormField(
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
                     ),
+                    validator: (value) =>
+                        FormValidator.validateRequired('Email', value!),
+                  ),
 
-                    const SizedBox(
-                      height: 20,
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  // password field
+                  TextFormField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocus,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
                     ),
+                    obscureText: true,
+                    validator: (value) =>
+                        FormValidator.validateRequired('Password', value!),
+                  ),
 
-                    // password field
-                    TextFormField(
-                      controller: _passwordController,
-                      focusNode: _passwordFocus,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
-                      obscureText: true,
-                      validator: (value) =>
-                          FormValidator.validateRequired('Password', value!),
-                    ),
-
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: _signIn,
-                      child: _isLoading
-                          ? const CircularProgressIndicator()
-                          : const Text('Sign In'),
-                    )
-                  ],
-                ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: _signIn,
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Sign In'),
+                  )
+                ],
               ),
             ),
           ),
