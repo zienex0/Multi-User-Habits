@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/models/user_model.dart';
 import 'package:multiuser_habits/services/db_users_service.dart';
@@ -38,6 +39,12 @@ class HabitUsersAvatars extends StatelessWidget {
           }
 
           List<CustomUser> uniqueHabitUsers = snapshot.data ?? [];
+          for (CustomUser customUser in uniqueHabitUsers) {
+            if (customUser.id == FirebaseAuth.instance.currentUser!.uid) {
+              uniqueHabitUsers.remove(customUser);
+              break;
+            }
+          }
           return _buildHabitUsersAvatars(uniqueHabitUsers);
         });
   }
