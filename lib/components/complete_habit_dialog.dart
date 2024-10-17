@@ -31,28 +31,43 @@ Future<HabitCheck?> showCompleteHabitDialog({
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Completion quantity"),
                 // AMOUNT FIELD
-                ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: 100, minWidth: 100),
-                  child: TextField(
-                    autofocus: true,
-                    controller: textMeasurementController,
-                    decoration: const InputDecoration(
-                      hintText: "Amount",
-                      border: OutlineInputBorder(),
+                Row(
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 120),
+                      child: TextField(
+                        style: const TextStyle(fontSize: 24),
+                        autofocus: true,
+                        controller: textMeasurementController,
+                        decoration: const InputDecoration(
+                          hintText: "Amount",
+                          hintStyle: TextStyle(fontSize: 20),
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(),
+                        inputFormatters: [
+                          filteringTextInputOnlyNumbersWithDecimalPoint
+                        ],
+                        onChanged: (value) {
+                          completionQuantityInput = value.trim();
+                          completionQuantity = double.tryParse(
+                              completionQuantityInput.replaceAll(r',', '.'));
+                        },
+                      ),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(),
-                    inputFormatters: [
-                      filteringTextInputOnlyNumbersWithDecimalPoint
-                    ],
-                    onChanged: (value) {
-                      completionQuantityInput = value.trim();
-                      completionQuantity = double.tryParse(
-                          completionQuantityInput.replaceAll(r',', '.'));
-                    },
-                  ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    Flexible(
+                      child: Text(
+                        habitMeasurement,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   height: 20,
@@ -62,7 +77,7 @@ Future<HabitCheck?> showCompleteHabitDialog({
                   autofocus: true,
                   controller: textUserNoteController,
                   decoration: const InputDecoration(
-                    hintText: "Description",
+                    hintText: "Guys, it's your turn now 🔥",
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 2,

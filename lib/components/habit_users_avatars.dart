@@ -47,7 +47,7 @@ _buildHabitUsersAvatars(List<CustomUser> usersList) {
   return SizedBox(
     height: 40,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         for (int i = 0; i < usersList.length && i < 3; i++)
           if (i < 3)

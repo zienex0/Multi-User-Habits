@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multiuser_habits/services/db_habit_checks_service.dart';
+import 'package:multiuser_habits/constants.dart';
 
 class HabitCheckSumRectangle extends StatelessWidget {
   HabitCheckSumRectangle(
       {required this.habitId,
       required this.habitMeasurement,
+      required this.colorId,
       required this.preview,
       super.key});
 
   final DbHabitChecks dbHabitChecks = DbHabitChecks();
   final String habitId;
   final String habitMeasurement;
+  final String colorId;
   final bool preview;
 
   @override
   Widget build(BuildContext context) {
     if (preview) {
-      return _buildStaticRectangle("0", habitMeasurement);
+      return _buildStaticRectangle("0", habitMeasurement, colorId);
     }
 
     return StreamBuilder(
@@ -29,24 +32,25 @@ class HabitCheckSumRectangle extends StatelessWidget {
             return const Text("Something went wrong");
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildStaticRectangle("...", "loading...");
+            return _buildStaticRectangle("...", "loading...", colorId);
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return _buildStaticRectangle("0", habitMeasurement);
+            return _buildStaticRectangle("0", habitMeasurement, colorId);
           }
 
           if (snapshot.data!.roundToDouble() == snapshot.data) {
             return _buildStaticRectangle(
-                snapshot.data!.toStringAsFixed(0), habitMeasurement);
+                snapshot.data!.toStringAsFixed(0), habitMeasurement, colorId);
           }
 
           return _buildStaticRectangle(
-              snapshot.data!.toStringAsFixed(1), habitMeasurement);
+              snapshot.data!.toStringAsFixed(1), habitMeasurement, colorId);
         });
   }
 
-  Widget _buildStaticRectangle(String score, String measurement) {
+  Widget _buildStaticRectangle(
+      String score, String measurement, String colorId) {
     return Container(
       // height: 100,
       width: 120,
@@ -61,10 +65,10 @@ class HabitCheckSumRectangle extends StatelessWidget {
           Text(
             score,
             style: GoogleFonts.roboto(
-              textStyle: const TextStyle(
+              textStyle: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromRGBO(255, 148, 148, 1)),
+                  color: kHabitTileColorMap[colorId]),
             ),
           ),
           // HABIT SCORE MEASUREMENT
@@ -74,8 +78,8 @@ class HabitCheckSumRectangle extends StatelessWidget {
             maxLines: 2,
             textAlign: TextAlign.center,
             style: GoogleFonts.roboto(
-              textStyle: const TextStyle(
-                  fontSize: 16, color: Color.fromRGBO(255, 148, 148, 1)),
+              textStyle:
+                  TextStyle(fontSize: 16, color: kHabitTileColorMap[colorId]),
             ),
           )
         ],

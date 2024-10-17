@@ -7,6 +7,7 @@ class Habit {
   final String creatorUid;
   double dailyGoal;
   String joinCode;
+  String colorId;
   String measurement;
   DateTime creationDate;
   List<String> userUids;
@@ -18,6 +19,7 @@ class Habit {
       required this.creatorUid,
       required this.dailyGoal,
       required this.joinCode,
+      required this.colorId,
       required this.measurement,
       required this.creationDate,
       required this.userUids});
@@ -38,6 +40,7 @@ class Habit {
           ? (data['dailyGoal'] as int).toDouble()
           : data['dailyGoal'] as double,
       joinCode: data['joinCode'],
+      colorId: data['colorId'],
       measurement: data['measurement'],
       creationDate: (data['creationDate'] as Timestamp).toDate(),
       userUids: List<String>.from(data['userUids'] ?? []),
@@ -51,6 +54,7 @@ class Habit {
       'creatorUid': creatorUid,
       'dailyGoal': dailyGoal,
       'joinCode': joinCode,
+      'colorId': colorId,
       'measurement': measurement,
       'creationDate': Timestamp.fromDate(creationDate),
       'userUids': userUids,

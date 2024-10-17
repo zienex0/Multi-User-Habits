@@ -40,6 +40,7 @@ class DbHabits {
       required double dailyGoal,
       required String creatorUid,
       required String joinCode,
+      required String colorId,
       required List<String> userUids}) async {
     try {
       DocumentReference docRef = await habitCollection.add({
@@ -50,6 +51,7 @@ class DbHabits {
         'dailyGoal': dailyGoal,
         'creatorUid': creatorUid,
         'joinCode': joinCode,
+        'colorId': colorId,
         'userUids': userUids
       });
 
@@ -60,6 +62,7 @@ class DbHabits {
           creatorUid: creatorUid,
           dailyGoal: dailyGoal,
           joinCode: joinCode,
+          colorId: colorId,
           measurement: measurement,
           creationDate: creationDate.toDate(),
           userUids: userUids);

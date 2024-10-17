@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/habit_tile.dart';
+import 'package:multiuser_habits/constants.dart';
 import 'package:multiuser_habits/pages/add_habit_page.dart';
 import 'package:multiuser_habits/pages/authentication_page.dart';
 import 'package:multiuser_habits/services/habits_provider.dart';
@@ -26,7 +27,7 @@ class _HabitsPageState extends State<HabitsPage> {
   Widget build(BuildContext context) {
     final habitsProvider = context.watch<HabitsProvider>();
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(46, 46, 46, 1),
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
             onPressed: () async {
