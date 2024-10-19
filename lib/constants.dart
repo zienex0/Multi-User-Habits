@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const kBackgroundColor = Color.fromRGBO(46, 46, 46, 1);
+const kDarkPrimaryColor = Color.fromRGBO(26, 26, 26, 1);
 
 const Map<String, Color> kHabitTileColorMap = {
   'colorId1': Color.fromRGBO(255, 221, 129, 1),

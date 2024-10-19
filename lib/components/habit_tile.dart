@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:multiuser_habits/components/complete_habit_button.dart';
 import 'package:multiuser_habits/components/habit_check_sum_rectangle.dart';
 import 'package:multiuser_habits/components/habit_users_avatars.dart';
+import 'package:multiuser_habits/constants.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
 import 'package:multiuser_habits/pages/habit_details_page.dart';
 
@@ -29,22 +30,24 @@ class HabitTile extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Color.fromRGBO(26, 26, 26, 1),
+            color: kDarkPrimaryColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          height: 150,
+          height: 120,
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+            padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // HABIT SCORE SUM
-                HabitCheckSumRectangle(
-                  habitId: habit.id,
-                  habitMeasurement: habit.measurement,
-                  preview: preview,
-                  colorId: habit.colorId,
+                SizedBox(
+                  width: 120,
+                  child: HabitCheckSumRectangle(
+                    habitId: habit.id,
+                    habitMeasurement: habit.measurement,
+                    preview: preview,
+                    colorId: habit.colorId,
+                  ),
                 ),
 
                 const SizedBox(
@@ -60,7 +63,7 @@ class HabitTile extends StatelessWidget {
                       Text(
                         habit.title.isNotEmpty ? habit.title : 'No habit name',
                         style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                            fontSize: 26, fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

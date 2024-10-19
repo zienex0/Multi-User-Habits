@@ -9,6 +9,8 @@ class HabitCheckSumRectangle extends StatelessWidget {
       required this.habitMeasurement,
       required this.colorId,
       required this.preview,
+      this.backgroundColor = kBackgroundColor,
+      this.onlyFromUserUid,
       super.key});
 
   final DbHabitChecks dbHabitChecks = DbHabitChecks();
@@ -16,6 +18,18 @@ class HabitCheckSumRectangle extends StatelessWidget {
   final String habitMeasurement;
   final String colorId;
   final bool preview;
+  final Color backgroundColor;
+  final String? onlyFromUserUid;
+
+  HabitCheckSumRectangle copyWithBackgroundColor(Color newBackgroundColor) {
+    return HabitCheckSumRectangle(
+      habitId: habitId,
+      habitMeasurement: habitMeasurement,
+      colorId: colorId,
+      preview: preview,
+      backgroundColor: newBackgroundColor,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,25 +67,24 @@ class HabitCheckSumRectangle extends StatelessWidget {
       String score, String measurement, String colorId) {
     return Container(
       // height: 100,
-      width: 120,
+      // width: 60,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color.fromRGBO(46, 46, 46, 1)),
+          borderRadius: BorderRadius.circular(10), color: backgroundColor),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // HABIT SCORE
+          // * HABIT SCORE
           Text(
             score,
             style: GoogleFonts.roboto(
               textStyle: TextStyle(
-                  fontSize: 36,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: kHabitTileColorMap[colorId]),
             ),
           ),
-          // HABIT SCORE MEASUREMENT
+          // * HABIT SCORE MEASUREMENT
           Text(
             measurement.trim().isEmpty ? "Completions" : measurement.trim(),
             overflow: TextOverflow.ellipsis,
@@ -79,7 +92,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.roboto(
               textStyle:
-                  TextStyle(fontSize: 16, color: kHabitTileColorMap[colorId]),
+                  TextStyle(fontSize: 20, color: kHabitTileColorMap[colorId]),
             ),
           )
         ],

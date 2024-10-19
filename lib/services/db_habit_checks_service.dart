@@ -44,6 +44,8 @@ class DbHabitChecks {
     });
   }
 
+  // TODO Get only one specified user habit checks completion sum function
+
   Future<HabitCheck?> addHabitCheck({
     required String habitId,
     required double quantity,
@@ -58,19 +60,21 @@ class DbHabitChecks {
     }
 
     try {
+      Timestamp timestampCompletionDateNow = Timestamp.now();
       DocumentReference doc = await habitChecksCollection.add({
         'habitId': habitId,
         'quantity': quantity,
         'userNote': userNote,
         'userUid': userUid,
-        'completionDate': Timestamp.now(),
+        'completionDate': timestampCompletionDateNow,
       });
       return HabitCheck(
           id: doc.id,
           habitId: habitId,
           quantity: quantity,
           userNote: userNote,
-          userUid: userUid);
+          userUid: userUid,
+          completionDate: timestampCompletionDateNow.toDate());
     } catch (e) {
       print("Error while adding a habit check to a habit with id $habitId. $e");
       return null;

@@ -6,13 +6,15 @@ class HabitCheck {
   double quantity;
   String userNote;
   String userUid;
+  DateTime completionDate;
 
   HabitCheck(
       {required this.id,
       required this.habitId,
       required this.quantity,
       required this.userNote,
-      required this.userUid});
+      required this.userUid,
+      required this.completionDate});
 
   factory HabitCheck.fromFirestore(DocumentSnapshot doc) {
     if (!doc.exists || doc.data() == null) {
@@ -27,6 +29,7 @@ class HabitCheck {
             ? (data['quantity'] as int).toDouble()
             : data['quantity'] as double,
         userNote: data['userNote'],
-        userUid: data['userUid']);
+        userUid: data['userUid'],
+        completionDate: (data['completionDate'] as Timestamp).toDate());
   }
 }

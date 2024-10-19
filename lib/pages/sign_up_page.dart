@@ -41,6 +41,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         User? user = userCredential.user;
         if (user != null) {
+          await user.updateDisplayName(_displayNameController.text.trim());
           await dbUsers.addCustomUser(
               uid: user.uid,
               displayName: _displayNameController.text.trim(),

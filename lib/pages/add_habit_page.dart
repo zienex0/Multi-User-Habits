@@ -49,7 +49,7 @@ class _AddHabitPageState extends State<AddHabitPage> {
       joinCode: 'PREVIEW_JOIN_CODE',
       colorId: 'colorId1',
       dailyGoal: 0.0,
-      measurement: 'none',
+      measurement: 'Completions',
       creationDate: DateTime.now(),
       userUids: [FirebaseAuth.instance.currentUser!.uid]);
 
