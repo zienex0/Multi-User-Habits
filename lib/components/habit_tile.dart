@@ -33,13 +33,13 @@ class HabitTile extends StatelessWidget {
             color: kDarkPrimaryColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          height: 120,
+          height: 130,
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // HABIT SCORE SUM
+                // * HABIT SCORE SUM
                 SizedBox(
                   width: 120,
                   child: HabitCheckSumRectangle(

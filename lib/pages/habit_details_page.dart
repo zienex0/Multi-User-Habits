@@ -1,11 +1,17 @@
-import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:multiuser_habits/components/habit_check_sum_rectangle.dart';
 import 'package:multiuser_habits/components/habit_users_avatars.dart';
 import 'package:multiuser_habits/constants.dart';
+import 'package:multiuser_habits/models/habit_check_model.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
+import 'package:multiuser_habits/models/user_model.dart';
+import 'package:multiuser_habits/services/db_habit_checks_service.dart';
+import 'package:multiuser_habits/services/db_users_service.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+final _auth = FirebaseAuth.instance;
 
 class HabitDetailsPage extends StatelessWidget {
   const HabitDetailsPage({required this.habit, super.key});
@@ -55,60 +61,38 @@ class HabitDetailsPage extends StatelessWidget {
               UsersContributingAndAllScore(habit: habit),
 
               const SizedBox(
-                height: 50,
+                height: 20,
               ),
               // * LIST OF LATEST COMPLETIONS
               Container(
+                height: 300,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                    color: kBackgroundColor,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: List.generate(
-                      4,
-                      (index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Row(
-                          children: [
-                            const CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 18,
-                              child: Icon(Icons.person),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'users_username',
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                    Text(
-                                      " at 12:21 today",
-                                      style: TextStyle(
-                                          color: Colors.white.withOpacity(0.5)),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  '${Random().nextInt(9) + 1} minutes',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: kHabitTileColorMap[habit.colorId]),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  color: kBackgroundColor,
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                child: StreamBuilder(
+                    stream:
+                        DbHabitChecks().getLatestHabitCheckCompletion(habit.id),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Text("Something went wrong");
+                      }
+                      if (ConnectionState.waiting == snapshot.connectionState) {
+                        return const CircularProgressIndicator();
+                      }
+
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return const Text("No completions yet hehe");
+                      }
+                      final latestCompletion = snapshot.data!;
+
+                      return Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: UserHabitCheckCompletionTile(
+                            habitCheck: latestCompletion),
+                      );
+                    }),
               ),
               const SizedBox(
                 height: 100,
@@ -118,6 +102,84 @@ class HabitDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class UserHabitCheckCompletionTile extends StatelessWidget {
+  const UserHabitCheckCompletionTile({
+    super.key,
+    required this.habitCheck,
+  });
+
+  final HabitCheck habitCheck;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            HabitCheckUserUsernameExtractor(userUid: habitCheck.userUid),
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              timeago.format(habitCheck.completionDate),
+              style: GoogleFonts.roboto(
+                  fontSize: 20, color: Colors.white.withOpacity(0.4)),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class HabitCheckUserUsernameExtractor extends StatelessWidget {
+  const HabitCheckUserUsernameExtractor({
+    super.key,
+    required this.userUid,
+  });
+
+  final String userUid;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: DbUsers().getUser(userUid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SizedBox(
+                height: 30, width: 100, child: LinearProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Text("Something went wrong");
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const SizedBox(
+                height: 30, width: 100, child: LinearProgressIndicator());
+          }
+
+          CustomUser? habitCheckUser = snapshot.data;
+          if (habitCheckUser == null) {
+            return const SizedBox(
+                height: 30, width: 100, child: LinearProgressIndicator());
+          }
+          return Text(
+            habitCheckUser.displayName,
+            style: GoogleFonts.roboto(fontSize: 20),
+          );
+        });
   }
 }
 
@@ -143,14 +205,23 @@ class UsersContributingAndAllScore extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "X contributing",
-                    // TODO MAKE THE X THE ACTUAL USER COUNT
-                    maxLines: 2,
-                    style: TextStyle(fontSize: 20),
-                    overflow: TextOverflow.ellipsis,
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "X users",
+                        // TODO MAKE THE X THE ACTUAL USER COUNT
+                        style: TextStyle(fontSize: 20),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Icon(
+                        Icons.format_list_bulleted_add,
+                        size: 40,
+                        color: Colors.white,
+                      )
+                    ],
                   ),
                   const SizedBox(
                     height: 10,
@@ -180,6 +251,7 @@ class UsersContributingAndAllScore extends StatelessWidget {
             ),
             child: HabitCheckSumRectangle(
                     habitId: habit.id,
+                    userUid: _auth.currentUser!.uid,
                     habitMeasurement: habit.measurement,
                     colorId: habit.colorId,
                     preview: false)
@@ -211,13 +283,13 @@ class CurrentUserHabitSummary extends StatelessWidget {
         child: Column(
           children: [
             const CircleAvatar(
-              radius: 20,
+              radius: 30,
               backgroundColor: Colors.white,
               child: Icon(Icons.person),
             ),
             Text(
-              FirebaseAuth.instance.currentUser!.displayName != null
-                  ? FirebaseAuth.instance.currentUser!.displayName!
+              _auth.currentUser!.displayName != null
+                  ? _auth.currentUser!.displayName!
                   : "Anynomous",
               style: const TextStyle(fontSize: 20),
             ),
@@ -233,10 +305,25 @@ class CurrentUserHabitSummary extends StatelessWidget {
                         color: kBackgroundColor,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.white)),
-                    child: Text(
-                      "streak \nplaceholder",
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.all_inclusive),
+                            Text(
+                              'X',
+                              style: GoogleFonts.roboto(fontSize: 24),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          "streak",
+                          style: GoogleFonts.roboto(fontSize: 20),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
                 ),

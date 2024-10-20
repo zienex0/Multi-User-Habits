@@ -23,19 +23,33 @@ class DbHabitChecks {
     }
   }
 
-  Stream<List<HabitCheck>> getHabitChecksStream(String habitId) {
-    return habitChecksCollection
-        .where('habitId', isEqualTo: habitId)
-        .snapshots()
-        .map((QuerySnapshot querySnapshot) {
-      return querySnapshot.docs
-          .map((doc) => HabitCheck.fromFirestore(doc))
-          .toList();
-    });
+  Stream<List<HabitCheck>> getHabitChecksStream(String habitId,
+      {String? userUid}) {
+    if (userUid == null) {
+      return habitChecksCollection
+          .where('habitId', isEqualTo: habitId)
+          .snapshots()
+          .map((QuerySnapshot querySnapshot) {
+        return querySnapshot.docs
+            .map((doc) => HabitCheck.fromFirestore(doc))
+            .toList();
+      });
+    } else {
+      return habitChecksCollection
+          .where('habitId', isEqualTo: habitId)
+          .where('userUid', isEqualTo: userUid)
+          .snapshots()
+          .map((QuerySnapshot querySnapshot) {
+        return querySnapshot.docs
+            .map((doc) => HabitCheck.fromFirestore(doc))
+            .toList();
+      });
+    }
   }
 
-  Stream<double> getHabitChecksCompletionSum(String habitId) {
-    return getHabitChecksStream(habitId).map((habitChecks) {
+  Stream<double> getHabitChecksCompletionSum(String habitId,
+      {String? userUid}) {
+    return getHabitChecksStream(habitId, userUid: userUid).map((habitChecks) {
       double completionSum = 0;
       for (HabitCheck habitCheck in habitChecks) {
         completionSum += habitCheck.quantity;
@@ -44,7 +58,21 @@ class DbHabitChecks {
     });
   }
 
-  // TODO Get only one specified user habit checks completion sum function
+  Stream<HabitCheck?> getLatestHabitCheckCompletion(String habitId) {
+    return habitChecksCollection
+        .where('habitId', isEqualTo: habitId)
+        .orderBy('completionDate')
+        .snapshots()
+        .map((QuerySnapshot querySnapshot) {
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      } else {
+        return querySnapshot.docs.first.exists
+            ? HabitCheck.fromFirestore(querySnapshot.docs.first)
+            : null;
+      }
+    });
+  }
 
   Future<HabitCheck?> addHabitCheck({
     required String habitId,

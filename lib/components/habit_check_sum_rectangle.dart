@@ -10,7 +10,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
       required this.colorId,
       required this.preview,
       this.backgroundColor = kBackgroundColor,
-      this.onlyFromUserUid,
+      this.userUid,
       super.key});
 
   final DbHabitChecks dbHabitChecks = DbHabitChecks();
@@ -19,7 +19,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
   final String colorId;
   final bool preview;
   final Color backgroundColor;
-  final String? onlyFromUserUid;
+  final String? userUid;
 
   HabitCheckSumRectangle copyWithBackgroundColor(Color newBackgroundColor) {
     return HabitCheckSumRectangle(
@@ -27,6 +27,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
       habitMeasurement: habitMeasurement,
       colorId: colorId,
       preview: preview,
+      userUid: userUid,
       backgroundColor: newBackgroundColor,
     );
   }
@@ -38,7 +39,8 @@ class HabitCheckSumRectangle extends StatelessWidget {
     }
 
     return StreamBuilder(
-        stream: dbHabitChecks.getHabitChecksCompletionSum(habitId),
+        stream: dbHabitChecks.getHabitChecksCompletionSum(habitId,
+            userUid: userUid),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             print(

@@ -32,7 +32,7 @@ class HabitUsersAvatars extends StatelessWidget {
         future: dbUsersCollection.getUsersConnectedToHabit(habitId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox(height: 20, child: LinearProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -76,7 +76,7 @@ _buildHabitUsersAvatars(List<CustomUser> usersList, int maxUsersToShow) {
           radius: 18,
           child: Text(
             "+$maxUsersToShow",
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         ),
     ],

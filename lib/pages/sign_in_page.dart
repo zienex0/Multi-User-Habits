@@ -68,7 +68,7 @@ class _MyWidgetState extends State<SignInPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _emailFocus.dispose();
-    _passwordController.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
