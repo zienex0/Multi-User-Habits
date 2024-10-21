@@ -63,36 +63,82 @@ class HabitDetailsPage extends StatelessWidget {
               const SizedBox(
                 height: 20,
               ),
+
+              Divider(
+                color: Colors.white.withOpacity(0.5),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: 90,
+                    decoration: BoxDecoration(
+                        color: kBackgroundColor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          "Latest",
+                          style: GoogleFonts.roboto(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 90,
+                    decoration: BoxDecoration(
+                        color: kBackgroundColor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          "My",
+                          style: GoogleFonts.roboto(
+                              fontSize: 20,
+                              color: Colors.white.withOpacity(0.5)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 90,
+                    decoration: BoxDecoration(
+                        color: kBackgroundColor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          "Top",
+                          style: GoogleFonts.roboto(
+                              fontSize: 20,
+                              color: Colors.white.withOpacity(0.5)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
               // * LIST OF LATEST COMPLETIONS
               Container(
-                height: 300,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: kBackgroundColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: StreamBuilder(
-                    stream:
-                        DbHabitChecks().getLatestHabitCheckCompletion(habit.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text("Something went wrong");
-                      }
-                      if (ConnectionState.waiting == snapshot.connectionState) {
-                        return const CircularProgressIndicator();
-                      }
-
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return const Text("No completions yet hehe");
-                      }
-                      final latestCompletion = snapshot.data!;
-
-                      return Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: UserHabitCheckCompletionTile(
-                            habitCheck: latestCompletion),
-                      );
-                    }),
+                child: LatestHabitCheckCompletionsStreamBuilder(habit: habit),
               ),
               const SizedBox(
                 height: 100,
@@ -105,40 +151,102 @@ class HabitDetailsPage extends StatelessWidget {
   }
 }
 
+class LatestHabitCheckCompletionsStreamBuilder extends StatelessWidget {
+  const LatestHabitCheckCompletionsStreamBuilder({
+    super.key,
+    required this.habit,
+  });
+
+  final Habit habit;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: DbHabitChecks().getLatestHabitCheckCompletion(habit.id),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.error);
+            return const Text("Something went wrong");
+          }
+          if (ConnectionState.waiting == snapshot.connectionState) {
+            return const CircularProgressIndicator();
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Text("No completions yet hehe");
+          }
+          final latestCompletion = snapshot.data!;
+
+          return Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: UserHabitCheckCompletionTile(
+              habitCheck: latestCompletion,
+              habit: habit,
+            ),
+          );
+        });
+  }
+}
+
 class UserHabitCheckCompletionTile extends StatelessWidget {
   const UserHabitCheckCompletionTile({
     super.key,
     required this.habitCheck,
+    required this.habit,
   });
 
   final HabitCheck habitCheck;
+  final Habit habit;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            HabitCheckUserUsernameExtractor(userUid: habitCheck.userUid),
-            const SizedBox(
-              width: 10,
-            ),
-            Text(
-              timeago.format(habitCheck.completionDate),
-              style: GoogleFonts.roboto(
-                  fontSize: 20, color: Colors.white.withOpacity(0.4)),
-            ),
-          ],
-        )
+        const CircleAvatar(
+          radius: 18,
+          backgroundColor: Colors.white,
+          child: Icon(Icons.person),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  HabitCheckUserUsernameExtractor(userUid: habitCheck.userUid),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    timeago.format(habitCheck.completionDate),
+                    style: GoogleFonts.roboto(
+                        fontSize: 16, color: Colors.white.withOpacity(0.4)),
+                  ),
+                ],
+              ),
+              Text(
+                "${habitCheck.quantity} ${habit.measurement}",
+                style: GoogleFonts.roboto(
+                  color: kHabitTileColorMap[habit.colorId],
+                  fontSize: 24,
+                ),
+              ),
+              Text(
+                habitCheck.userNote.isNotEmpty
+                    ? habitCheck.userNote
+                    : "No note left",
+                style: GoogleFonts.roboto(fontSize: 16),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -177,7 +285,7 @@ class HabitCheckUserUsernameExtractor extends StatelessWidget {
           }
           return Text(
             habitCheckUser.displayName,
-            style: GoogleFonts.roboto(fontSize: 20),
+            style: GoogleFonts.roboto(fontSize: 16),
           );
         });
   }
@@ -251,7 +359,6 @@ class UsersContributingAndAllScore extends StatelessWidget {
             ),
             child: HabitCheckSumRectangle(
                     habitId: habit.id,
-                    userUid: _auth.currentUser!.uid,
                     habitMeasurement: habit.measurement,
                     colorId: habit.colorId,
                     preview: false)
@@ -341,6 +448,7 @@ class CurrentUserHabitSummary extends StatelessWidget {
                             color: kHabitTileColorMap[habit.colorId]!)),
                     child: HabitCheckSumRectangle(
                             habitId: habit.id,
+                            userUid: _auth.currentUser!.uid,
                             habitMeasurement: habit.measurement,
                             colorId: habit.colorId,
                             preview: false)

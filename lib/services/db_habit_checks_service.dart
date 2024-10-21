@@ -61,7 +61,7 @@ class DbHabitChecks {
   Stream<HabitCheck?> getLatestHabitCheckCompletion(String habitId) {
     return habitChecksCollection
         .where('habitId', isEqualTo: habitId)
-        .orderBy('completionDate')
+        .orderBy('completionDate', descending: true)
         .snapshots()
         .map((QuerySnapshot querySnapshot) {
       if (querySnapshot.docs.isEmpty) {
