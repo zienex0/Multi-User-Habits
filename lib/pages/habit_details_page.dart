@@ -12,6 +12,9 @@ import 'package:multiuser_habits/services/db_users_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 final _auth = FirebaseAuth.instance;
+const int maxLatestCompletions = 3;
+const double _bigIconSize = 50.0;
+const double _smallIconSize = 20.0;
 
 class HabitDetailsPage extends StatelessWidget {
   const HabitDetailsPage({required this.habit, super.key});
@@ -21,129 +24,174 @@ class HabitDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kDarkPrimaryColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // * HABIT TITLE AND COMPLETION BUTTON
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 70,
+              right: 10,
+              left: 10,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     habit.title,
-                    style: const TextStyle(
-                        fontSize: 36, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.roboto(
+                        fontSize: 40, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                  const SizedBox(
+                    height: 60,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: CurrentUserHabitSummary(habit: habit),
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              // * MY HABIT SUMMARY (MY SCORE AND CURRENT DAILY STREAK)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40.0,
+            ),
+            DraggableScrollableSheet(
+                initialChildSize: 0.40,
+                minChildSize: 0.4,
+                maxChildSize: 0.8,
+                builder: (context, scrollController) {
+                  return Container(
+                    decoration: const BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 80,
+                          blurStyle: BlurStyle.solid,
+                          color: Colors.black,
+                          offset: Offset.zero,
+                          spreadRadius: -10,
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: _buildHabitCompletions(habit),
+                    ),
+                  );
+                }),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  size: _smallIconSize,
                 ),
-                child: CurrentUserHabitSummary(habit: habit),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(
-                height: 20,
-              ),
-
-              // * USERS CONTRIBUTING AND COMPLETION SUM
-              UsersContributingAndAllScore(habit: habit),
-
-              const SizedBox(
-                height: 20,
-              ),
-
-              Divider(
-                color: Colors.white.withOpacity(0.5),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    width: 90,
+  Widget _buildHabitCompletions(Habit habit) {
+    return Column(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            color: kBackgroundColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 150.0),
+                  child: Container(
+                    height: 8,
                     decoration: BoxDecoration(
-                        color: kBackgroundColor,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          "Latest",
-                          style: GoogleFonts.roboto(
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
+                        borderRadius: BorderRadius.circular(200),
+                        color: Colors.white.withOpacity(0.5)),
                   ),
-                  Container(
-                    width: 90,
-                    decoration: BoxDecoration(
-                        color: kBackgroundColor,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          "My",
-                          style: GoogleFonts.roboto(
-                              fontSize: 20,
-                              color: Colors.white.withOpacity(0.5)),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 90,
-                    decoration: BoxDecoration(
-                        color: kBackgroundColor,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          "Top",
-                          style: GoogleFonts.roboto(
-                              fontSize: 20,
-                              color: Colors.white.withOpacity(0.5)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-
-              // * LIST OF LATEST COMPLETIONS
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: kBackgroundColor,
-                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: LatestHabitCheckCompletionsStreamBuilder(habit: habit),
-              ),
-              const SizedBox(
-                height: 100,
-              ),
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                UsersContributingAndAllScore(habit: habit),
+                const SizedBox(height: 20),
+                Divider(
+                  thickness: 3,
+                  color: Colors.white.withOpacity(0.3),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildTabButton("Latest", true),
+                    _buildTabButton("My", false),
+                    _buildTabButton("Top", false),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: kDarkPrimaryColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      LatestHabitCheckCompletionsStreamBuilder(
+                        habit: habit,
+                      ),
+                      const Icon(
+                        Icons.arrow_drop_down_rounded,
+                        size: 50,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          height: 80,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [kBackgroundColor, Colors.transparent],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabButton(String text, bool isActive) {
+    return Container(
+      width: 90,
+      decoration: BoxDecoration(
+        color:
+            isActive ? kDarkPrimaryColor : kDarkPrimaryColor.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Text(
+            text,
+            style: GoogleFonts.roboto(
+              fontSize: 20,
+              color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
+            ),
           ),
         ),
       ),
@@ -162,7 +210,8 @@ class LatestHabitCheckCompletionsStreamBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: DbHabitChecks().getLatestHabitCheckCompletion(habit.id),
+        stream: DbHabitChecks()
+            .getLatestHabitCheckCompletions(habit.id, maxLatestCompletions),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             print(snapshot.error);
@@ -172,16 +221,44 @@ class LatestHabitCheckCompletionsStreamBuilder extends StatelessWidget {
             return const CircularProgressIndicator();
           }
 
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Text("No completions yet hehe");
+          if (!snapshot.hasData ||
+              snapshot.data == null ||
+              snapshot.data!.isEmpty) {
+            return const Column(
+              children: [
+                SizedBox(
+                  height: _bigIconSize,
+                ),
+                Text("No completions yet hehe"),
+              ],
+            );
           }
-          final latestCompletion = snapshot.data!;
+          final latestCompletions = snapshot.data!;
+          print(latestCompletions);
 
           return Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: UserHabitCheckCompletionTile(
-              habitCheck: latestCompletion,
-              habit: habit,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+            child: Column(
+              children: [
+                for (int index = 0; index < latestCompletions.length; index++)
+                  Column(
+                    children: [
+                      UserHabitCheckCompletionTile(
+                        habitCheck: latestCompletions[index],
+                        habit: habit,
+                      ),
+                      index < maxLatestCompletions
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0, vertical: 5),
+                              child: Divider(
+                                color: Colors.white.withOpacity(0.5),
+                              ),
+                            )
+                          : const SizedBox(),
+                    ],
+                  ),
+              ],
             ),
           );
         });
@@ -203,10 +280,13 @@ class UserHabitCheckCompletionTile extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const CircleAvatar(
-          radius: 18,
-          backgroundColor: Colors.white,
-          child: Icon(Icons.person),
+        const Padding(
+          padding: EdgeInsets.only(left: 20.0),
+          child: CircleAvatar(
+            radius: 18,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.person),
+          ),
         ),
         const SizedBox(
           width: 10,
@@ -232,21 +312,24 @@ class UserHabitCheckCompletionTile extends StatelessWidget {
               Text(
                 "${habitCheck.quantity} ${habit.measurement}",
                 style: GoogleFonts.roboto(
-                  color: kHabitTileColorMap[habit.colorId],
+                  // color: kHabitTileColorMap[habit.colorId],
+                  color: Colors.white,
                   fontSize: 24,
                 ),
-              ),
-              Text(
-                habitCheck.userNote.isNotEmpty
-                    ? habitCheck.userNote
-                    : "No note left",
-                style: GoogleFonts.roboto(fontSize: 16),
-                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              )
+              ),
             ],
           ),
         ),
+        habitCheck.userNote.isEmpty
+            ? Container()
+            : const Padding(
+                padding: EdgeInsets.only(right: 20.0),
+                child: Icon(
+                  Icons.remove_red_eye_rounded,
+                  size: 30,
+                ),
+              )
       ],
     );
   }
@@ -307,7 +390,7 @@ class UsersContributingAndAllScore extends StatelessWidget {
           child: Container(
             height: 150,
             decoration: BoxDecoration(
-              color: kBackgroundColor,
+              color: kDarkPrimaryColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Padding(
@@ -354,7 +437,7 @@ class UsersContributingAndAllScore extends StatelessWidget {
           child: Container(
             height: 150,
             decoration: BoxDecoration(
-              color: kBackgroundColor,
+              color: kDarkPrimaryColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: HabitCheckSumRectangle(
@@ -382,7 +465,7 @@ class CurrentUserHabitSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kBackgroundColor,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(

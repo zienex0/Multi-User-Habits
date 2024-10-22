@@ -58,18 +58,30 @@ class DbHabitChecks {
     });
   }
 
-  Stream<HabitCheck?> getLatestHabitCheckCompletion(String habitId) {
+  Stream<List<HabitCheck>> getLatestHabitCheckCompletions(
+      String habitId, int numberOfChecks) {
     return habitChecksCollection
         .where('habitId', isEqualTo: habitId)
         .orderBy('completionDate', descending: true)
         .snapshots()
         .map((QuerySnapshot querySnapshot) {
       if (querySnapshot.docs.isEmpty) {
-        return null;
+        return [];
       } else {
-        return querySnapshot.docs.first.exists
-            ? HabitCheck.fromFirestore(querySnapshot.docs.first)
-            : null;
+        List<DocumentSnapshot> docsSnapshots = querySnapshot.docs;
+        List<DocumentSnapshot> dbHead = docsSnapshots.length < numberOfChecks
+            ? docsSnapshots
+            : docsSnapshots.sublist(0, numberOfChecks);
+
+        List<HabitCheck> habitChecks = [];
+
+        dbHead
+            .map((doc) => doc.exists
+                ? habitChecks.add(HabitCheck.fromFirestore(doc))
+                : null)
+            .toList();
+
+        return habitChecks;
       }
     });
   }

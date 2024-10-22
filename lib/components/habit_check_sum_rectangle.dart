@@ -87,14 +87,17 @@ class HabitCheckSumRectangle extends StatelessWidget {
             ),
           ),
           // * HABIT SCORE MEASUREMENT
-          Text(
-            measurement.trim().isEmpty ? "Completions" : measurement.trim(),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.roboto(
-              textStyle:
-                  TextStyle(fontSize: 20, color: kHabitTileColorMap[colorId]),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              measurement.trim().isEmpty ? "Completions" : measurement.trim(),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.roboto(
+                textStyle:
+                    TextStyle(fontSize: 20, color: kHabitTileColorMap[colorId]),
+              ),
             ),
           )
         ],
