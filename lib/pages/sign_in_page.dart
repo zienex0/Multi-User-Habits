@@ -36,11 +36,12 @@ class _MyWidgetState extends State<SignInPage> {
         User? user = userCredential.user;
         if (user != null) {
           if (mounted) {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (BuildContext context) => const HabitsPage(),
               ),
+              (route) => false,
             );
           }
         }

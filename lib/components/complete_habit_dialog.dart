@@ -100,7 +100,7 @@ Future<HabitCheck?> showCompleteHabitDialog({
                     _auth.currentUser != null &&
                     !isLoading) {
                   isLoading = true;
-                  HabitCheck? habitCheck = await _dbHabitChecks.addHabitCheck(
+                  HabitCheck? habitCheck = await DbHabitChecks.addHabitCheck(
                       habitId: habitId,
                       quantity: completionQuantity!,
                       userNote: textUserNoteController.text.trim(),

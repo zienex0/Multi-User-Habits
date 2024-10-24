@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:multiuser_habits/models/habit_check_model.dart';
-import 'package:multiuser_habits/services/db_habits_service.dart';
 import 'package:multiuser_habits/models/habit_model.dart';
+import 'package:multiuser_habits/services/db_habits_service.dart';
+
+CollectionReference habitChecksCollection =
+    FirebaseFirestore.instance.collection("habitChecks");
+final DbHabits _dbHabits = DbHabits();
 
 class DbHabitChecks {
-  CollectionReference habitChecksCollection =
-      FirebaseFirestore.instance.collection("habitChecks");
-  final DbHabits _dbHabits = DbHabits();
-
-  Future<List<HabitCheck>> getHabitChecks(String habitId) async {
+  static Future<List<HabitCheck>> getHabitChecks(String habitId) async {
     try {
       QuerySnapshot querySnapshot = await habitChecksCollection
           .where('habitId', isEqualTo: habitId)
@@ -23,7 +23,7 @@ class DbHabitChecks {
     }
   }
 
-  Stream<List<HabitCheck>> getHabitChecksStream(String habitId,
+  static Stream<List<HabitCheck>> getHabitChecksStream(String habitId,
       {String? userUid}) {
     if (userUid == null) {
       return habitChecksCollection
@@ -47,7 +47,7 @@ class DbHabitChecks {
     }
   }
 
-  Stream<double> getHabitChecksCompletionSum(String habitId,
+  static Stream<double> getHabitChecksCompletionSum(String habitId,
       {String? userUid}) {
     return getHabitChecksStream(habitId, userUid: userUid).map((habitChecks) {
       double completionSum = 0;
@@ -58,7 +58,7 @@ class DbHabitChecks {
     });
   }
 
-  Stream<List<HabitCheck>> getLatestHabitCheckCompletions(
+  static Stream<List<HabitCheck>> getLatestHabitCheckCompletions(
       String habitId, int numberOfChecks) {
     return habitChecksCollection
         .where('habitId', isEqualTo: habitId)
@@ -86,7 +86,7 @@ class DbHabitChecks {
     });
   }
 
-  Future<HabitCheck?> addHabitCheck({
+  static Future<HabitCheck?> addHabitCheck({
     required String habitId,
     required double quantity,
     required String userNote,

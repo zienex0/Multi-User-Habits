@@ -48,12 +48,13 @@ class _SignUpPageState extends State<SignUpPage> {
               email: _emailController.text.trim(),
               photoUrl: '');
 
-          if (context.mounted) {
-            Navigator.pushReplacement(
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (BuildContext context) => const HabitsPage(),
               ),
+              (route) => false,
             );
           }
         }

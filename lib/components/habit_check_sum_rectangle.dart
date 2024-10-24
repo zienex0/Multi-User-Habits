@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:multiuser_habits/services/db_habit_checks_service.dart';
+import 'package:intl/intl.dart';
 import 'package:multiuser_habits/constants.dart';
+import 'package:multiuser_habits/services/db_habit_checks_service.dart';
 
 class HabitCheckSumRectangle extends StatelessWidget {
-  HabitCheckSumRectangle(
+  const HabitCheckSumRectangle(
       {required this.habitId,
       required this.habitMeasurement,
       required this.colorId,
@@ -13,7 +14,6 @@ class HabitCheckSumRectangle extends StatelessWidget {
       this.userUid,
       super.key});
 
-  final DbHabitChecks dbHabitChecks = DbHabitChecks();
   final String habitId;
   final String habitMeasurement;
   final String colorId;
@@ -39,7 +39,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
     }
 
     return StreamBuilder(
-        stream: dbHabitChecks.getHabitChecksCompletionSum(habitId,
+        stream: DbHabitChecks.getHabitChecksCompletionSum(habitId,
             userUid: userUid),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -55,18 +55,15 @@ class HabitCheckSumRectangle extends StatelessWidget {
             return _buildStaticRectangle("0", habitMeasurement, colorId);
           }
 
-          if (snapshot.data!.roundToDouble() == snapshot.data) {
-            return _buildStaticRectangle(
-                snapshot.data!.toStringAsFixed(0), habitMeasurement, colorId);
-          }
-
           return _buildStaticRectangle(
-              snapshot.data!.toStringAsFixed(1), habitMeasurement, colorId);
+              NumberFormat.compact().format(snapshot.data!),
+              habitMeasurement,
+              colorId);
         });
   }
 
   Widget _buildStaticRectangle(
-      String score, String measurement, String colorId) {
+      String scoreText, String measurement, String colorId) {
     return Container(
       // height: 100,
       // width: 60,
@@ -78,7 +75,7 @@ class HabitCheckSumRectangle extends StatelessWidget {
         children: [
           // * HABIT SCORE
           Text(
-            score,
+            scoreText,
             style: GoogleFonts.roboto(
               textStyle: TextStyle(
                   fontSize: 24,

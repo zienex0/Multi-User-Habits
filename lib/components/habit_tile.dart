@@ -63,7 +63,7 @@ class HabitTile extends StatelessWidget {
                       Text(
                         habit.title.isNotEmpty ? habit.title : 'No habit name',
                         style: const TextStyle(
-                            fontSize: 26, fontWeight: FontWeight.bold),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

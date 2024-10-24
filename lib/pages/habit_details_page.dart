@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:multiuser_habits/components/habit_check_sum_rectangle.dart';
+import 'package:multiuser_habits/components/habit_checks_chart.dart';
 import 'package:multiuser_habits/components/habit_users_avatars.dart';
 import 'package:multiuser_habits/constants.dart';
 import 'package:multiuser_habits/models/habit_check_model.dart';
@@ -29,43 +30,36 @@ class HabitDetailsPage extends StatelessWidget {
           children: [
             Positioned(
               top: 70,
-              right: 10,
-              left: 10,
+              right: 20,
+              left: 20,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    habit.title,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                        fontSize: 40, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
                   const SizedBox(
-                    height: 60,
+                    height: 40,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: CurrentUserHabitSummary(habit: habit),
+                  CurrentUserHabitSummary(habit: habit),
+                  const SizedBox(
+                    height: 80,
+                  ),
+                  HabitChecksChart(
+                    habit: habit,
                   ),
                 ],
               ),
             ),
             DraggableScrollableSheet(
-                initialChildSize: 0.40,
-                minChildSize: 0.4,
-                maxChildSize: 0.8,
+                initialChildSize: 0.20,
+                minChildSize: 0.2,
+                maxChildSize: 0.9,
                 builder: (context, scrollController) {
                   return Container(
                     decoration: const BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          blurRadius: 80,
-                          blurStyle: BlurStyle.solid,
+                          blurRadius: 50,
+                          blurStyle: BlurStyle.normal,
                           color: Colors.black,
-                          offset: Offset.zero,
-                          spreadRadius: -10,
                         ),
                       ],
                     ),
@@ -78,16 +72,29 @@ class HabitDetailsPage extends StatelessWidget {
             Positioned(
               top: 10,
               left: 10,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  size: _smallIconSize,
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      size: _smallIconSize,
+                    ),
+                  ),
+                  Text(
+                    habit.title,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.roboto(
+                        fontSize: 40, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ],
               ),
             ),
           ],
@@ -210,8 +217,8 @@ class LatestHabitCheckCompletionsStreamBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: DbHabitChecks()
-            .getLatestHabitCheckCompletions(habit.id, maxLatestCompletions),
+        stream: DbHabitChecks.getLatestHabitCheckCompletions(
+            habit.id, maxLatestCompletions),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             print(snapshot.error);
@@ -309,14 +316,26 @@ class UserHabitCheckCompletionTile extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
-                "${habitCheck.quantity} ${habit.measurement}",
-                style: GoogleFonts.roboto(
-                  // color: kHabitTileColorMap[habit.colorId],
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Text(
+                    "${habitCheck.quantity}",
+                    style: GoogleFonts.roboto(
+                      color: kHabitTileColorMap[habit.colorId],
+                      fontSize: 20,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    " ${habit.measurement}",
+                    style: GoogleFonts.roboto(
+                      // color: kHabitTileColorMap[habit.colorId],
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ],
           ),
@@ -468,80 +487,77 @@ class CurrentUserHabitSummary extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person),
-            ),
-            Text(
-              _auth.currentUser!.displayName != null
-                  ? _auth.currentUser!.displayName!
-                  : "Anynomous",
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                        color: kBackgroundColor,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.all_inclusive),
-                            Text(
-                              'X',
-                              style: GoogleFonts.roboto(fontSize: 24),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          "streak",
-                          style: GoogleFonts.roboto(fontSize: 20),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+      child: Column(
+        children: [
+          const CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.person),
+          ),
+          Text(
+            _auth.currentUser!.displayName != null
+                ? _auth.currentUser!.displayName!
+                : "Anynomous",
+            style: const TextStyle(fontSize: 20),
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 90,
+                  decoration: BoxDecoration(
+                      color: kBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.all_inclusive),
+                          Text(
+                            'X',
+                            style: GoogleFonts.roboto(fontSize: 24),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        "streak",
+                        style: GoogleFonts.roboto(fontSize: 20),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  width: 10,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              // * MY HABIT SCORE SUM
+              Expanded(
+                child: Container(
+                  height: 90,
+                  decoration: BoxDecoration(
+                      color: kBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: kHabitTileColorMap[habit.colorId]!)),
+                  child: HabitCheckSumRectangle(
+                          habitId: habit.id,
+                          userUid: _auth.currentUser!.uid,
+                          habitMeasurement: habit.measurement,
+                          colorId: habit.colorId,
+                          preview: false)
+                      .copyWithBackgroundColor(Colors.transparent),
                 ),
-                // * MY HABIT SCORE SUM
-                Expanded(
-                  child: Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                        color: kBackgroundColor,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                            color: kHabitTileColorMap[habit.colorId]!)),
-                    child: HabitCheckSumRectangle(
-                            habitId: habit.id,
-                            userUid: _auth.currentUser!.uid,
-                            habitMeasurement: habit.measurement,
-                            colorId: habit.colorId,
-                            preview: false)
-                        .copyWithBackgroundColor(Colors.transparent),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
